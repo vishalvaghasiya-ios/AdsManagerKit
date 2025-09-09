@@ -4,7 +4,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "AdsManagerKit",
+    name: "AdsManager",
     platforms: [
         .iOS(.v14) // <- minimum iOS version is 14
     ],
