@@ -1,7 +1,7 @@
 import Foundation
 import UIKit
 
-struct AdsConfig {
+public struct AdsConfig {
 
     // MARK: - Private helpers
     private static func getString(forKey key: String) -> String {
@@ -67,43 +67,29 @@ struct AdsConfig {
         set { setString(newValue, forKey: #function) }
     }
 
-    // MARK: - Error/Count Variables
+    // MARK: - Persistent Ad Error Counts
     static var bannerAdErrorCount: Int {
         get { getInt(forKey: #function) }
         set { setInt(newValue, forKey: #function) }
     }
-
-    static var currentBannerAdErrorCount: Int {
-        get { getInt(forKey: #function) }
-        set { setInt(newValue, forKey: #function) }
-    }
-
-    static var interstitialAdDisplayCount: Int {
-        get { getInt(forKey: #function) }
-        set { setInt(newValue, forKey: #function) }
-    }
-
+    
     static var interstitialAdErrorCount: Int {
         get { getInt(forKey: #function) }
         set { setInt(newValue, forKey: #function) }
     }
-
-    static var currentInterstitialAdErrorCount: Int {
-        get { getInt(forKey: #function) }
-        set { setInt(newValue, forKey: #function) }
-    }
-
-    static var interstitialAdShowCount: Int {
-        get { getInt(forKey: #function) }
-        set { setInt(newValue, forKey: #function) }
-    }
-
+    
     static var nativeAdErrorCount: Int {
         get { getInt(forKey: #function) }
         set { setInt(newValue, forKey: #function) }
     }
 
-    static var currentNativeAdErrorCount: Int {
+    // MARK: - Current Ad Error Counters (resets on app restart)
+    nonisolated(unsafe) static var currentBannerAdErrorCount: Int = 0
+    nonisolated(unsafe) static var currentInterstitialAdErrorCount: Int = 0
+    nonisolated(unsafe) static var currentNativeAdErrorCount: Int = 0
+    
+    // MARK: - Interstitial Ad Counters
+    static var interstitialAdShowCount: Int {
         get { getInt(forKey: #function) }
         set { setInt(newValue, forKey: #function) }
     }

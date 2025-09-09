@@ -2,10 +2,49 @@ import Foundation
 import AppTrackingTransparency
 import UIKit
 import GoogleMobileAds
+public struct AdsConfiguration {
+    var appOpenAdEnabled: Bool
+    var bannerAdEnabled: Bool
+    var interstitialAdEnabled: Bool
+    var nativeAdEnabled: Bool
+    var nativeAdPreloadEnabled: Bool
+
+    var appOpenAdUnitId: String
+    var bannerAdUnitId: String
+    var interstitialAdUnitId: String
+    var nativeAdUnitId: String
+
+    var interstitialAdShowCount: Int = 4
+
+    var bannerAdErrorCount: Int = 3
+    var interstitialAdErrorCount: Int = 3
+    var nativeAdErrorCount: Int = 3
+}
+
 @MainActor
 public final class AdsManager: NSObject {
     
     public static let shared = AdsManager()
+    
+    func setupAds(with config: AdsConfiguration) {
+        AdsConfig.appOpenAdEnabled = config.appOpenAdEnabled
+        AdsConfig.bannerAdEnabled = config.bannerAdEnabled
+        AdsConfig.interstitialAdEnabled = config.interstitialAdEnabled
+        AdsConfig.nativeAdEnabled = config.nativeAdEnabled
+        AdsConfig.nativeAdPreloadEnabled = config.nativeAdPreloadEnabled
+
+        AdsConfig.appOpenAdUnitId = config.appOpenAdUnitId
+        AdsConfig.bannerAdUnitId = config.bannerAdUnitId
+        AdsConfig.interstitialAdUnitId = config.interstitialAdUnitId
+        AdsConfig.nativeAdUnitId = config.nativeAdUnitId
+
+        AdsConfig.interstitialAdShowCount = config.interstitialAdShowCount
+
+        AdsConfig.bannerAdErrorCount = config.bannerAdErrorCount
+        AdsConfig.interstitialAdErrorCount = config.interstitialAdErrorCount
+        AdsConfig.nativeAdErrorCount = config.nativeAdErrorCount
+    }
+    
     
     public func requestAppTrackingPermission(completion: @escaping () -> Void) {
         ATTrackingManager.requestTrackingAuthorization { _ in
