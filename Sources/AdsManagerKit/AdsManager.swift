@@ -3,22 +3,52 @@ import AppTrackingTransparency
 import UIKit
 import GoogleMobileAds
 public struct AdsConfiguration {
-    var appOpenAdEnabled: Bool
-    var bannerAdEnabled: Bool
-    var interstitialAdEnabled: Bool
-    var nativeAdEnabled: Bool
-    var nativeAdPreloadEnabled: Bool
+    public var appOpenAdEnabled: Bool
+    public var bannerAdEnabled: Bool
+    public var interstitialAdEnabled: Bool
+    public var nativeAdEnabled: Bool
+    public var nativeAdPreloadEnabled: Bool
 
-    var appOpenAdUnitId: String
-    var bannerAdUnitId: String
-    var interstitialAdUnitId: String
-    var nativeAdUnitId: String
+    public var appOpenAdUnitId: String
+    public var bannerAdUnitId: String
+    public var interstitialAdUnitId: String
+    public var nativeAdUnitId: String
 
-    var interstitialAdShowCount: Int = 4
+    public var interstitialAdShowCount: Int = 4
 
-    var bannerAdErrorCount: Int = 3
-    var interstitialAdErrorCount: Int = 3
-    var nativeAdErrorCount: Int = 3
+    public var bannerAdErrorCount: Int = 3
+    public var interstitialAdErrorCount: Int = 3
+    public var nativeAdErrorCount: Int = 3
+
+    public init(
+        appOpenAdEnabled: Bool,
+        bannerAdEnabled: Bool,
+        interstitialAdEnabled: Bool,
+        nativeAdEnabled: Bool,
+        nativeAdPreloadEnabled: Bool,
+        appOpenAdUnitId: String,
+        bannerAdUnitId: String,
+        interstitialAdUnitId: String,
+        nativeAdUnitId: String,
+        interstitialAdShowCount: Int = 4,
+        bannerAdErrorCount: Int = 3,
+        interstitialAdErrorCount: Int = 3,
+        nativeAdErrorCount: Int = 3
+    ) {
+        self.appOpenAdEnabled = appOpenAdEnabled
+        self.bannerAdEnabled = bannerAdEnabled
+        self.interstitialAdEnabled = interstitialAdEnabled
+        self.nativeAdEnabled = nativeAdEnabled
+        self.nativeAdPreloadEnabled = nativeAdPreloadEnabled
+        self.appOpenAdUnitId = appOpenAdUnitId
+        self.bannerAdUnitId = bannerAdUnitId
+        self.interstitialAdUnitId = interstitialAdUnitId
+        self.nativeAdUnitId = nativeAdUnitId
+        self.interstitialAdShowCount = interstitialAdShowCount
+        self.bannerAdErrorCount = bannerAdErrorCount
+        self.interstitialAdErrorCount = interstitialAdErrorCount
+        self.nativeAdErrorCount = nativeAdErrorCount
+    }
 }
 
 @MainActor
@@ -26,7 +56,7 @@ public final class AdsManager: NSObject {
     
     public static let shared = AdsManager()
     
-    func setupAds(with config: AdsConfiguration) {
+    public func setupAds(with config: AdsConfiguration) {
         AdsConfig.appOpenAdEnabled = config.appOpenAdEnabled
         AdsConfig.bannerAdEnabled = config.bannerAdEnabled
         AdsConfig.interstitialAdEnabled = config.interstitialAdEnabled
