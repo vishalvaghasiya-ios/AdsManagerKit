@@ -2,15 +2,15 @@ import GoogleMobileAds
 import UIKit
 
 @MainActor
-final class InterstitialAdManager: NSObject, FullScreenContentDelegate {
+public final class InterstitialAdManager: NSObject, FullScreenContentDelegate {
     
-    static let shared = InterstitialAdManager()
+    public static let shared = InterstitialAdManager()
     
     private var interstitialAd: InterstitialAd?
     private var completionHandler: (() -> Void)?
     var displayCounter: Int = 0
     
-    func resetErrorCounter() {
+    public func resetErrorCounter() {
         AdsConfig.currentInterstitialAdErrorCount = 0
     }
     
@@ -22,7 +22,7 @@ final class InterstitialAdManager: NSObject, FullScreenContentDelegate {
         return AdsConfig.currentInterstitialAdErrorCount >= AdsConfig.interstitialAdErrorCount
     }
     
-    func loadAndShow(completion: @escaping () -> Void) {
+    public func loadAndShow(completion: @escaping () -> Void) {
         self.completionHandler = completion
         
         if let ad = interstitialAd {
@@ -61,7 +61,7 @@ final class InterstitialAdManager: NSObject, FullScreenContentDelegate {
     }
     
     /// Load the interstitial ad
-    func loadAd() {
+    public func loadAd() {
         guard !hasExceededErrorLimit() else {
             print("[InterstitialAd] ⚠️ Max error attempts reached — not loading.")
             return
@@ -91,7 +91,7 @@ final class InterstitialAdManager: NSObject, FullScreenContentDelegate {
     }
     
     /// Show the ad if available, then run completion
-    func showAd(from viewController: UIViewController, completion: @escaping () -> Void) {
+    public func showAd(from viewController: UIViewController, completion: @escaping () -> Void) {
         guard AdsConfig.interstitialAdEnabled, let ad = interstitialAd else {
             loadAd()
             completion()
@@ -111,21 +111,21 @@ final class InterstitialAdManager: NSObject, FullScreenContentDelegate {
     
     // MARK: - GADFullScreenContentDelegate
     
-    func adDidDismissFullScreenContent(_ ad: FullScreenPresentingAd) {
+    public func adDidDismissFullScreenContent(_ ad: FullScreenPresentingAd) {
         print("[InterstitialAd] Dismissed")
         interstitialAd = nil
         loadAd()
         completionHandler?()
     }
     
-    func ad(_ ad: FullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
+    public func ad(_ ad: FullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
         print("[InterstitialAd] Failed to present: \(error.localizedDescription)")
         interstitialAd = nil
         loadAd()
         completionHandler?()
     }
     
-    func adWillPresentFullScreenContent(_ ad: FullScreenPresentingAd) {
+    public func adWillPresentFullScreenContent(_ ad: FullScreenPresentingAd) {
         print("[InterstitialAd] Will present")
     }
 }

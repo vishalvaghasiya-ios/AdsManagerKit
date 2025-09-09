@@ -2,14 +2,14 @@ import GoogleMobileAds
 import UIKit
 
 @MainActor
-final class BannerAdManager: NSObject {
+public final class BannerAdManager: NSObject {
     
-    static let shared = BannerAdManager()
+    public static let shared = BannerAdManager()
     
     private var bannerView: BannerView?
     private var completionHandler: ((Bool) -> Void)?
     
-    func resetErrorCounter() {
+    public func resetErrorCounter() {
         AdsConfig.currentBannerAdErrorCount = 0
     }
     
@@ -21,7 +21,7 @@ final class BannerAdManager: NSObject {
         return AdsConfig.currentBannerAdErrorCount >= AdsConfig.bannerAdErrorCount
     }
     
-    func loadBannerAd(in containerView: UIView,
+    public func loadBannerAd(in containerView: UIView,
                       vc: UIViewController,
                       completion: @escaping (Bool) -> Void) {
         
@@ -60,13 +60,13 @@ final class BannerAdManager: NSObject {
 }
 
 extension BannerAdManager: BannerViewDelegate {
-    func bannerViewDidReceiveAd(_ bannerView: BannerView) {
+    public func bannerViewDidReceiveAd(_ bannerView: BannerView) {
         print("[BannerAd] loaded.")
         self.resetErrorCounter()
         completionHandler?(true)
     }
 
-    func bannerView(_ bannerView: BannerView, didFailToReceiveAdWithError error: Error) {
+    public func bannerView(_ bannerView: BannerView, didFailToReceiveAdWithError error: Error) {
         print("[BannerAd] Failed to load: \(error.localizedDescription)")
         self.incrementErrorCounter()
         completionHandler?(false)

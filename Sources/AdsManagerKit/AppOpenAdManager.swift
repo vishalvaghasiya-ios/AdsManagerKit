@@ -3,9 +3,9 @@ import UIKit
 
 // MARK: - AppOpenAdManager
 @MainActor
-final class AppOpenAdManager: NSObject {
+public final class AppOpenAdManager: NSObject {
 
-    static let shared = AppOpenAdManager()
+    public static let shared = AppOpenAdManager()
 
     private var appOpenAd: AppOpenAd?
     private var didFirstLoadFail = false
@@ -31,7 +31,7 @@ final class AppOpenAdManager: NSObject {
 
     // MARK: - Public Methods
 
-    func loadAndShow(completion: @escaping () -> Void) {
+    public func loadAndShow(completion: @escaping () -> Void) {
         self.completionHandler = completion
 
         if isLoadingAd || isAdAvailable() {
@@ -67,7 +67,7 @@ final class AppOpenAdManager: NSObject {
         }
     }
 
-    func requestAppOpenAd() {
+    public func requestAppOpenAd() {
         if isLoadingAd || isAdAvailable() {
             return
         }
@@ -89,7 +89,7 @@ final class AppOpenAdManager: NSObject {
         }
     }
 
-    func tryToPresentAd() {
+    public func tryToPresentAd() {
         if isShowingAd {
             print("[AppOpenAd] is already showing.")
             return
@@ -113,21 +113,21 @@ final class AppOpenAdManager: NSObject {
 
 extension AppOpenAdManager: FullScreenContentDelegate {
 
-    func adDidDismissFullScreenContent(_ ad: FullScreenPresentingAd) {
+    public func adDidDismissFullScreenContent(_ ad: FullScreenPresentingAd) {
         print("[AppOpenAd] Dismissed")
         appOpenAd = nil
         isShowingAd = false
         completionHandler?()
     }
 
-    func ad(_ ad: FullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
+    public func ad(_ ad: FullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
         print("[AppOpenAd] Failed to present: \(error.localizedDescription)")
         appOpenAd = nil
         isShowingAd = false
         completionHandler?()
     }
 
-    func adWillPresentFullScreenContent(_ ad: FullScreenPresentingAd) {
+    public func adWillPresentFullScreenContent(_ ad: FullScreenPresentingAd) {
         print("[AppOpenAd] Will present")
     }
 }
