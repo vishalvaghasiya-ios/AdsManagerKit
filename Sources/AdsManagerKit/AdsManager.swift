@@ -80,8 +80,16 @@ public final class AdsManager: NSObject {
     }
     
     public func requestAppTrackingPermission(completion: @escaping () -> Void) {
-        ATTrackingManager.requestTrackingAuthorization { _ in
-            completion()
+        if #available(iOS 14, *) {
+            ATTrackingManager.requestTrackingAuthorization { status in
+                DispatchQueue.main.async {
+                    completion()
+                }
+            }
+        } else {
+            DispatchQueue.main.async {
+                completion()
+            }
         }
     }
     
