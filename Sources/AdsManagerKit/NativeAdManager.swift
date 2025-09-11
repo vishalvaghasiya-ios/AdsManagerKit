@@ -68,7 +68,7 @@ final class NativeAdManager: NSObject {
     
     private func displayNativeAd(in containerView: UIView, _ nativeAd: NativeAd, adType: AdType) {
         // Load the custom XIB
-        guard let adView = Bundle.main.loadNibNamed(adType.rawValue, owner: nil, options: nil)?.first as? NativeAdView else {
+        guard let adView = Bundle.module.loadNibNamed(adType.rawValue, owner: nil, options: nil)?.first as? NativeAdView else {
             self.completionHandler?(false)
             return
         }

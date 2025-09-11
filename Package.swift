@@ -24,8 +24,11 @@ let package = Package(
             name: "AdsManager",
             dependencies: [
                 .product(name: "GoogleMobileAds", package: "swift-package-manager-google-mobile-ads")
+            ],
+            resources: [
+                .process("Resources")
             ]
         ),
             
-    ]
+    ],
 )
