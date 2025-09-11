@@ -112,8 +112,9 @@ public final class AdsManager: NSObject {
 
     // MARK: - Native Ad
     public func loadNative(in containerView: UIView,
+                           adType: AdType = .SMALL,
                            completion: @escaping (Bool) -> Void) {
-        NativeAdManager.shared.getAd(in: containerView, completion: completion)
+        NativeAdManager.shared.getAd(in: containerView, adType: adType, completion: completion)
     }
     
 }

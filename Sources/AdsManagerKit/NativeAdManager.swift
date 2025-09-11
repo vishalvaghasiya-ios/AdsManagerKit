@@ -1,6 +1,6 @@
 import GoogleMobileAds
 import UIKit
-enum AdType: String {
+public enum AdType: String {
     case SMALL = "NativeAdView_Small"
     case MEDIUM = "NativeAdView_Medium"
     case LARGE = "NativeAdView"
