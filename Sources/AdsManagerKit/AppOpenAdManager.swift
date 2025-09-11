@@ -67,7 +67,7 @@ public final class AppOpenAdManager: NSObject {
         }
     }
 
-    public func requestAppOpenAd() {
+    func loadOpenAd() {
         if isLoadingAd || isAdAvailable() {
             return
         }
@@ -89,7 +89,7 @@ public final class AppOpenAdManager: NSObject {
         }
     }
 
-    public func tryToPresentAd() {
+    func tryToPresentAd() {
         if isShowingAd {
             print("[AppOpenAd] is already showing.")
             return
@@ -97,7 +97,7 @@ public final class AppOpenAdManager: NSObject {
 
         if !isAdAvailable() {
             print("[AppOpenAd] is not ready yet.")
-            requestAppOpenAd()
+            loadOpenAd()
             return
         }
 

@@ -2,9 +2,9 @@ import GoogleMobileAds
 import UIKit
 
 @MainActor
-public final class BannerAdManager: NSObject {
+final class BannerAdManager: NSObject {
     
-    public static let shared = BannerAdManager()
+    static let shared = BannerAdManager()
     
     private var bannerView: BannerView?
     private var completionHandler: ((Bool) -> Void)?
@@ -21,7 +21,7 @@ public final class BannerAdManager: NSObject {
         return AdsConfig.currentBannerAdErrorCount >= AdsConfig.bannerAdErrorCount
     }
     
-    public func loadBannerAd(in containerView: UIView,
+    func loadBannerAd(in containerView: UIView,
                       vc: UIViewController,
                       completion: @escaping (Bool) -> Void) {
         

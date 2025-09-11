@@ -73,8 +73,11 @@ public final class AdsManager: NSObject {
         AdsConfig.bannerAdErrorCount = config.bannerAdErrorCount
         AdsConfig.interstitialAdErrorCount = config.interstitialAdErrorCount
         AdsConfig.nativeAdErrorCount = config.nativeAdErrorCount
+        
+        self.loadOpenAd()
+        self.loadInterstitial()
+        self.preloadNativeAds()
     }
-    
     
     public func requestAppTrackingPermission(completion: @escaping () -> Void) {
         ATTrackingManager.requestTrackingAuthorization { _ in
@@ -89,6 +92,10 @@ public final class AdsManager: NSObject {
     }
  
     // MARK: - App Open Ad
+    public func loadOpenAd() {
+        AppOpenAdManager.shared.loadOpenAd()
+    }
+    
     public func presentAppOpenAdIfAvailable() {
         AppOpenAdManager.shared.tryToPresentAd()
     }
@@ -111,6 +118,10 @@ public final class AdsManager: NSObject {
     }
 
     // MARK: - Native Ad
+    public func preloadNativeAds() {
+        NativeAdManager.shared.preloadNativeAds()
+    }
+    
     public func loadNative(in containerView: UIView,
                            adType: AdType = .SMALL,
                            completion: @escaping (Bool) -> Void) {

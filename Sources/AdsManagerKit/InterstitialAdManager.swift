@@ -61,7 +61,7 @@ public final class InterstitialAdManager: NSObject, FullScreenContentDelegate {
     }
     
     /// Load the interstitial ad
-    public func loadAd() {
+    func loadAd() {
         guard !hasExceededErrorLimit() else {
             print("[InterstitialAd] ⚠️ Max error attempts reached — not loading.")
             return
@@ -91,7 +91,7 @@ public final class InterstitialAdManager: NSObject, FullScreenContentDelegate {
     }
     
     /// Show the ad if available, then run completion
-    public func showAd(from viewController: UIViewController, completion: @escaping () -> Void) {
+    func showAd(from viewController: UIViewController, completion: @escaping () -> Void) {
         guard AdsConfig.interstitialAdEnabled, let ad = interstitialAd else {
             loadAd()
             completion()

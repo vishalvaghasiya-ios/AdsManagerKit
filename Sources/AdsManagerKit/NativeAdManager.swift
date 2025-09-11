@@ -33,11 +33,13 @@ final class NativeAdManager: NSObject {
         return AdsConfig.currentNativeAdErrorCount >= AdsConfig.nativeAdErrorCount
     }
     
-    // MARK: - Preload Ads
-    func preloadAds(count: Int = 1) {
-        for i in 0..<count {
-            DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 0.5) {
-                self.loadAd()
+    // MARK: - Preload Native Ads
+    func preloadNativeAds(count: Int = 1) {
+        if AdsConfig.nativeAdPreloadEnabled {
+            for i in 0..<count {
+                DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 0.5) {
+                    self.loadAd()
+                }
             }
         }
     }
