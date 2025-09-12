@@ -173,6 +173,17 @@ Current Version: 1.0.0 (Initial Release)
 - Use Test Ad Units when `isProduction` is set to false.  
 - Always request UMP consent before loading personalized ads in regions requiring GDPR compliance.
 
+  
+### 🛠 Add Google Mobile Ads App ID
+Add your **Google Mobile Ads Application ID** in `Info.plist`:
+
+```xml
+<key>GADApplicationIdentifier</key>
+<string>ca-app-pub-xxxxxxxxxxxxxxxx~yyyyyyyyyy</string>
+```
+
+- Replace `ca-app-pub-xxxxxxxxxxxxxxxx~yyyyyyyyyy` with your actual AdMob App ID from the [AdMob Console](https://apps.admob.com/).
+
 ## 👤 Author
 
 **Vishal Vaghasiya**
