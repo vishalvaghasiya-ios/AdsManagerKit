@@ -2,6 +2,7 @@ import Foundation
 import AppTrackingTransparency
 import UIKit
 import GoogleMobileAds
+import UserMessagingPlatform
 public struct AdsConfiguration {
     public var isProduction: Bool
     public var appOpenAdEnabled: Bool
@@ -105,6 +106,47 @@ public final class AdsManager: NSObject {
         } else {
             DispatchQueue.main.async {
                 completion()
+            }
+        }
+    }
+    
+    public func requestUMPConsent(completion: @escaping (Bool) -> Void) {
+        let parameters = RequestParameters()
+#if DEBUG
+        let debugSettings = DebugSettings()
+        debugSettings.geography = DebugGeography.EEA
+        parameters.debugSettings = debugSettings
+#endif
+        ConsentInformation.shared.requestConsentInfoUpdate(with: parameters) { error in
+            if let error = error {
+                print("UMP Consent request failed: \(error.localizedDescription)")
+                completion(false)
+                return
+            }
+            
+            ConsentForm.load { form, loadError in
+                if let loadError = loadError {
+                    print("UMP Consent form load failed: \(loadError.localizedDescription)")
+                    completion(false)
+                    return
+                }
+                
+                if ConsentInformation.shared.formStatus == .available, let form = form {
+                    let rootVC = UIApplication.shared.connectedScenes
+                        .compactMap { $0 as? UIWindowScene }
+                        .flatMap { $0.windows }
+                        .first { $0.isKeyWindow }?.rootViewController ?? UIViewController()
+                    form.present(from: rootVC) { dismissError in
+                        if let dismissError = dismissError {
+                            print("UMP Consent form dismissed with error: \(dismissError.localizedDescription)")
+                            completion(false)
+                            return
+                        }
+                        completion(ConsentInformation.shared.consentStatus == .obtained)
+                    }
+                } else {
+                    completion(ConsentInformation.shared.consentStatus == .obtained)
+                }
             }
         }
     }
