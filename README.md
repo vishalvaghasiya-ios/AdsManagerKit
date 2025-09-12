@@ -48,7 +48,7 @@ https://github.com/vishalvaghasiya-ios/AdsManagerKit.git
 4. Select the desired version (latest stable recommended) and add it to your app target.  
 5. Import into your Swift files:  
 ```swift
-import AdsManagerKit
+import AdsManager
 ```
 
 ## 🚀 Quick Start
