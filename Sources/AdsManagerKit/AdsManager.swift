@@ -3,6 +3,7 @@ import AppTrackingTransparency
 import UIKit
 import GoogleMobileAds
 public struct AdsConfiguration {
+    public var isProduction: Bool
     public var appOpenAdEnabled: Bool
     public var bannerAdEnabled: Bool
     public var interstitialAdEnabled: Bool
@@ -21,6 +22,7 @@ public struct AdsConfiguration {
     public var nativeAdErrorCount: Int = 3
 
     public init(
+        isProduction: Bool,
         appOpenAdEnabled: Bool,
         bannerAdEnabled: Bool,
         interstitialAdEnabled: Bool,
@@ -35,6 +37,7 @@ public struct AdsConfiguration {
         interstitialAdErrorCount: Int = 3,
         nativeAdErrorCount: Int = 3
     ) {
+        self.isProduction = isProduction
         self.appOpenAdEnabled = appOpenAdEnabled
         self.bannerAdEnabled = bannerAdEnabled
         self.interstitialAdEnabled = interstitialAdEnabled
@@ -57,16 +60,24 @@ public final class AdsManager: NSObject {
     public static let shared = AdsManager()
     
     public func setupAds(with config: AdsConfiguration) {
+        AdsConfig.isProduction = config.isProduction
         AdsConfig.appOpenAdEnabled = config.appOpenAdEnabled
         AdsConfig.bannerAdEnabled = config.bannerAdEnabled
         AdsConfig.interstitialAdEnabled = config.interstitialAdEnabled
         AdsConfig.nativeAdEnabled = config.nativeAdEnabled
         AdsConfig.nativeAdPreloadEnabled = config.nativeAdPreloadEnabled
 
-        AdsConfig.appOpenAdUnitId = config.appOpenAdUnitId
-        AdsConfig.bannerAdUnitId = config.bannerAdUnitId
-        AdsConfig.interstitialAdUnitId = config.interstitialAdUnitId
-        AdsConfig.nativeAdUnitId = config.nativeAdUnitId
+        if AdsConfig.isProduction {
+            AdsConfig.appOpenAdUnitId = config.appOpenAdUnitId
+            AdsConfig.bannerAdUnitId = config.bannerAdUnitId
+            AdsConfig.interstitialAdUnitId = config.interstitialAdUnitId
+            AdsConfig.nativeAdUnitId = config.nativeAdUnitId
+        } else {
+            AdsConfig.appOpenAdUnitId = "ca-app-pub-3940256099942544/5575463023"
+            AdsConfig.bannerAdUnitId = "ca-app-pub-3940256099942544/2934735716"
+            AdsConfig.interstitialAdUnitId = "ca-app-pub-3940256099942544/4411468910"
+            AdsConfig.nativeAdUnitId = "ca-app-pub-3940256099942544/3986624511"
+        }
 
         AdsConfig.interstitialAdShowCount = config.interstitialAdShowCount
 

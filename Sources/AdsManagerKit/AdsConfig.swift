@@ -21,6 +21,13 @@ public struct AdsConfig {
     }
 
     // MARK: - Ad Preferences
+
+    // MARK: - Environment
+    static var isProduction: Bool {
+        get { UserDefaults.standard.bool(forKey: #function) }
+        set { UserDefaults.standard.set(newValue, forKey: #function) }
+    }
+
     static var appOpenAdEnabled: Bool {
         get { UserDefaults.standard.bool(forKey: #function) }
         set { UserDefaults.standard.set(newValue, forKey: #function) }
