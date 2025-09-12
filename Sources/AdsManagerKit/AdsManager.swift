@@ -94,7 +94,12 @@ public final class AdsManager: NSObject {
         if #available(iOS 14, *) {
             ATTrackingManager.requestTrackingAuthorization { status in
                 DispatchQueue.main.async {
-                    completion()
+                    print("ATT Status: \(status.rawValue)")
+                    
+                    // Small delay before running completion
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        completion()
+                    }
                 }
             }
         } else {
