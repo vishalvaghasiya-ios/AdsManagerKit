@@ -187,3 +187,4 @@ Add your **Google Mobile Ads Application ID** in `Info.plist`:
 ## 👤 Author
 
 **Vishal Vaghasiya**
+GitHub: [vishalvaghasiya-ios](https://github.com/vishalvaghasiya-ios)
