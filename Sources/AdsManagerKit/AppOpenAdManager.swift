@@ -63,6 +63,7 @@ public final class AppOpenAdManager: NSObject {
                 self.appOpenAd = ad
                 self.appOpenAd?.fullScreenContentDelegate = self
                 self.adLoadTime = Date()
+                self.isLoadingAd = false
                 print("[AppOpenAd] loaded.")
                 self.appOpenAd?.present(from: nil)
             }
@@ -88,6 +89,7 @@ public final class AppOpenAdManager: NSObject {
                     self.appOpenAd = ad
                     self.appOpenAd?.fullScreenContentDelegate = self
                     self.adLoadTime = Date()
+                    self.isLoadingAd = false
                     print("[AppOpenAd] loaded.")
                 }
             }
@@ -122,6 +124,7 @@ extension AppOpenAdManager: FullScreenContentDelegate {
         print("[AppOpenAd] Dismissed")
         appOpenAd = nil
         isShowingAd = false
+        loadOpenAd()
         completionHandler?()
     }
 
@@ -129,6 +132,7 @@ extension AppOpenAdManager: FullScreenContentDelegate {
         print("[AppOpenAd] Failed to present: \(error.localizedDescription)")
         appOpenAd = nil
         isShowingAd = false
+        loadOpenAd()
         completionHandler?()
     }
 
