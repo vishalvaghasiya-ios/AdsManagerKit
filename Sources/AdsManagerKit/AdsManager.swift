@@ -129,6 +129,10 @@ public final class AdsManager: NSObject {
         }
     }
     
+    public var canRequestAds: Bool {
+      return ConsentInformation.shared.canRequestAds
+    }
+    
     public func requestUMPConsent(completion: @escaping (Bool) -> Void) {
         let parameters = RequestParameters()
         #if DEBUG
