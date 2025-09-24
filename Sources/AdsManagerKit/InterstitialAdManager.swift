@@ -1,4 +1,4 @@
-import GoogleMobileAds
+@preconcurrency import GoogleMobileAds
 import UIKit
 
 @MainActor
@@ -42,21 +42,22 @@ public final class InterstitialAdManager: NSObject, FullScreenContentDelegate {
             with: AdsConfig.interstitialAdUnitId,
             request: request
         ) { [weak self] ad, error in
-            guard let self = self else { return }
-            
-            if let error = error {
-                print("[InterstitialAd] Failed to load: \(error.localizedDescription)")
-                self.incrementErrorCounter()
-                self.completionHandler?()
-                return
+            Task { @MainActor [weak self] in
+                guard let self = self else { return }
+                
+                if let error = error {
+                    print("[InterstitialAd] Failed to load: \(error.localizedDescription)")
+                    self.incrementErrorCounter()
+                    self.completionHandler?()
+                    return
+                }
+                
+                self.resetErrorCounter()
+                
+                self.interstitialAd = ad
+                self.interstitialAd?.fullScreenContentDelegate = self
+                ad?.present(from: nil)
             }
-            
-            self.resetErrorCounter()
-            
-            self.interstitialAd = ad
-            self.interstitialAd?.fullScreenContentDelegate = self
-            ad?.present(from: nil)
-            
         }
     }
     
@@ -75,18 +76,20 @@ public final class InterstitialAdManager: NSObject, FullScreenContentDelegate {
         
         let request = Request()
         InterstitialAd.load(with: AdsConfig.interstitialAdUnitId, request: request) { [weak self] ad, error in
-            guard let self = self else { return }
-            
-            if let error = error {
-                print("[InterstitialAd] Failed to load: \(error.localizedDescription)")
-                self.incrementErrorCounter()
-                return
+            Task { @MainActor [weak self] in
+                guard let self = self else { return }
+                
+                if let error = error {
+                    print("[InterstitialAd] Failed to load: \(error.localizedDescription)")
+                    self.incrementErrorCounter()
+                    return
+                }
+                
+                self.resetErrorCounter()
+                self.interstitialAd = ad
+                self.interstitialAd?.fullScreenContentDelegate = self
+                print("[InterstitialAd] loaded and ready.")
             }
-            
-            self.resetErrorCounter()
-            self.interstitialAd = ad
-            self.interstitialAd?.fullScreenContentDelegate = self
-            print("[InterstitialAd] loaded and ready.")
         }
     }
     

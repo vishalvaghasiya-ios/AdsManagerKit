@@ -1,4 +1,4 @@
-import GoogleMobileAds
+@preconcurrency import GoogleMobileAds
 import UIKit
 
 // MARK: - AppOpenAdManager
@@ -9,7 +9,7 @@ public final class AppOpenAdManager: NSObject {
 
     private var appOpenAd: AppOpenAd?
     private var didFirstLoadFail = false
-    private var completionHandler: (() -> Void)?
+    private var completionHandler: (@Sendable () -> Void)?
 
     private let adValidityDuration: TimeInterval = 4 * 3_600
     private var adLoadTime: Date?
@@ -31,7 +31,7 @@ public final class AppOpenAdManager: NSObject {
 
     // MARK: - Public Methods
 
-    public func loadAndShow(completion: @escaping () -> Void) {
+    public func loadAndShow(completion: @escaping @Sendable () -> Void) {
         self.completionHandler = completion
 
         if isLoadingAd || isAdAvailable() {
@@ -44,26 +44,28 @@ public final class AppOpenAdManager: NSObject {
         AppOpenAd.load(
             with: AdsConfig.appOpenAdUnitId,
             request: request
-        ) { ad, error in
-            if let error = error {
-                self.isLoadingAd = false
-                self.appOpenAd = nil
-                self.adLoadTime = nil
-                if !self.didFirstLoadFail {
-                    self.didFirstLoadFail = true
-                    self.loadAndShow(completion: completion)
-                } else {
-                    self.completionHandler?()
+        ) { [weak self] ad, error in
+            Task { @MainActor in
+                guard let self else { return }
+                if let error = error {
+                    self.isLoadingAd = false
+                    self.appOpenAd = nil
+                    self.adLoadTime = nil
+                    if !self.didFirstLoadFail {
+                        self.didFirstLoadFail = true
+                        self.loadAndShow(completion: completion)
+                    } else {
+                        self.completionHandler?()
+                    }
+                    print("[AppOpenAd] Failed to load: \(error)")
+                    return
                 }
-                print("[AppOpenAd] Failed to load: \(error)")
-                return
+                self.appOpenAd = ad
+                self.appOpenAd?.fullScreenContentDelegate = self
+                self.adLoadTime = Date()
+                print("[AppOpenAd] loaded.")
+                self.appOpenAd?.present(from: nil)
             }
-            self.appOpenAd = ad
-            self.appOpenAd?.fullScreenContentDelegate = self
-            self.adLoadTime = Date()
-            print("[AppOpenAd] loaded.")
-
-            ad?.present(from: nil)
         }
     }
 
@@ -73,18 +75,21 @@ public final class AppOpenAdManager: NSObject {
         }
         if AdsConfig.appOpenAdEnabled {
             isLoadingAd = true
-            AppOpenAd.load(with: AdsConfig.appOpenAdUnitId, request: Request()) { ad, error in
-                if let error = error {
-                    self.isLoadingAd = false
-                    self.appOpenAd = nil
-                    self.adLoadTime = nil
-                    print("[AppOpenAd] Failed to load: \(error)")
-                    return
+            AppOpenAd.load(with: AdsConfig.appOpenAdUnitId, request: Request()) { [weak self] ad, error in
+                Task { @MainActor in
+                    guard let self else { return }
+                    if let error = error {
+                        self.isLoadingAd = false
+                        self.appOpenAd = nil
+                        self.adLoadTime = nil
+                        print("[AppOpenAd] Failed to load: \(error)")
+                        return
+                    }
+                    self.appOpenAd = ad
+                    self.appOpenAd?.fullScreenContentDelegate = self
+                    self.adLoadTime = Date()
+                    print("[AppOpenAd] loaded.")
                 }
-                self.appOpenAd = ad
-                self.appOpenAd?.fullScreenContentDelegate = self
-                self.adLoadTime = Date()
-                print("[AppOpenAd] loaded.")
             }
         }
     }
