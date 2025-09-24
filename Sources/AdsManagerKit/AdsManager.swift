@@ -117,23 +117,22 @@ public final class AdsManager: NSObject {
     }
     
     public func requestAppTrackingPermission(completion: @escaping () -> Void) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            if #available(iOS 14, *) {
-                guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                      scene.activationState == .foregroundActive else {
-                    self.pendingTrackingCompletion = completion
-                    _ = self.sceneDidActivateObserver
-                    return
-                }
-
+        if #available(iOS 14, *) {
+            guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                  scene.activationState == .foregroundActive else {
+                self.pendingTrackingCompletion = completion
+                _ = self.sceneDidActivateObserver
+                return
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                 ATTrackingManager.requestTrackingAuthorization { _ in
                     DispatchQueue.main.async {
                         completion()
                     }
                 }
-            } else {
-                completion()
             }
+        } else {
+            completion()
         }
     }
     
