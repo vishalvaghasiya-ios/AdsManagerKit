@@ -58,27 +58,6 @@ public struct AdsConfiguration {
 @MainActor
 public final class AdsManager: NSObject {
     
-    private var pendingTrackingCompletion: (() -> Void)?
-    
-    private lazy var sceneDidActivateObserver: NSObjectProtocol = {
-        NotificationCenter.default.addObserver(
-            forName: UIScene.didActivateNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            if #available(iOS 14, *) {
-                DispatchQueue.main.async {
-                    ATTrackingManager.requestTrackingAuthorization { _ in
-                        DispatchQueue.main.async {
-                            self?.pendingTrackingCompletion?()
-                            self?.pendingTrackingCompletion = nil
-                        }
-                    }
-                }
-            }
-        }
-    }()
-    
     public static let shared = AdsManager()
     
     public func setupAds(with config: AdsConfiguration) {
@@ -113,26 +92,6 @@ public final class AdsManager: NSObject {
                 self.loadInterstitial()
                 self.preloadNativeAds()
             }
-        }
-    }
-    
-    public func requestAppTrackingPermission(completion: @escaping () -> Void) {
-        if #available(iOS 14, *) {
-            guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                  scene.activationState == .foregroundActive else {
-                self.pendingTrackingCompletion = completion
-                _ = self.sceneDidActivateObserver
-                return
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                ATTrackingManager.requestTrackingAuthorization { _ in
-                    DispatchQueue.main.async {
-                        completion()
-                    }
-                }
-            }
-        } else {
-            completion()
         }
     }
     
