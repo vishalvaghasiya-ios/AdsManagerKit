@@ -106,9 +106,11 @@ public final class AdsManager: NSObject {
         AdsConfig.nativeAdErrorCount = config.nativeAdErrorCount
         
         requestUMPConsent { isConsent in
-            self.loadOpenAd()
-            self.loadInterstitial()
-            self.preloadNativeAds()
+            if self.canRequestAds {
+                self.loadOpenAd()
+                self.loadInterstitial()
+                self.preloadNativeAds()
+            }
         }
         
         if canRequestAds {
