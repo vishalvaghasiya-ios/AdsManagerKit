@@ -63,7 +63,7 @@ public final class AdsManager: NSObject {
     
     public static let shared = AdsManager()
     
-    public func setupAds(with config: AdsConfiguration) {
+    public func setupAds(with config: AdsConfiguration, completion: @Sendable @escaping () -> Void) {
         AdsConfig.isProduction = config.isProduction
         AdsConfig.appOpenAdEnabled = config.appOpenAdEnabled
         AdsConfig.bannerAdEnabled = config.bannerAdEnabled
@@ -96,10 +96,10 @@ public final class AdsManager: NSObject {
                     let canRequest = ConsentInformation.shared.canRequestAds
                     Task { @MainActor in
                         if canRequest {
-                            self.loadOpenAd()
                             self.loadInterstitial()
                             self.preloadNativeAds()
                         }
+                        completion()
                     }
                 }
             }
@@ -141,7 +141,7 @@ public final class AdsManager: NSObject {
         let parameters = RequestParameters()
         #if DEBUG
         let debugSettings = DebugSettings()
-        debugSettings.geography = .disabled
+        debugSettings.geography = .EEA
         parameters.debugSettings = debugSettings
         #endif
         ConsentInformation.shared.requestConsentInfoUpdate(with: parameters) { error in
@@ -168,6 +168,8 @@ public final class AdsManager: NSObject {
                             print("UMP Consent form dismissed with error: \(dismissError.localizedDescription)")
                             completion(false)
                             return
+                        } else {
+                            completion(ConsentInformation.shared.canRequestAds)
                         }
                     }
                 } else {
