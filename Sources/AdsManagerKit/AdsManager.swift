@@ -168,9 +168,8 @@ public final class AdsManager: NSObject {
                             print("UMP Consent form dismissed with error: \(dismissError.localizedDescription)")
                             completion(false)
                             return
-                        } else {
-                            completion(ConsentInformation.shared.canRequestAds)
                         }
+                        completion(ConsentInformation.shared.canRequestAds)
                     }
                 } else {
                     completion(ConsentInformation.shared.canRequestAds)
