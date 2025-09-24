@@ -17,6 +17,7 @@ public struct AdsConfiguration {
     public var nativeAdUnitId: String
     
     public var interstitialAdShowCount: Int
+    public var maxInterstitialAdsPerSession: Int
     
     public var bannerAdErrorCount: Int
     public var interstitialAdErrorCount: Int
@@ -34,6 +35,7 @@ public struct AdsConfiguration {
         interstitialAdUnitId: String,
         nativeAdUnitId: String,
         interstitialAdShowCount: Int = 4,
+        maxInterstitialAdsPerSession: Int = 50,
         bannerAdErrorCount: Int = 3,
         interstitialAdErrorCount: Int = 3,
         nativeAdErrorCount: Int = 3
@@ -49,6 +51,7 @@ public struct AdsConfiguration {
         self.interstitialAdUnitId = interstitialAdUnitId
         self.nativeAdUnitId = nativeAdUnitId
         self.interstitialAdShowCount = interstitialAdShowCount
+        self.maxInterstitialAdsPerSession = maxInterstitialAdsPerSession
         self.bannerAdErrorCount = bannerAdErrorCount
         self.interstitialAdErrorCount = interstitialAdErrorCount
         self.nativeAdErrorCount = nativeAdErrorCount
@@ -81,6 +84,7 @@ public final class AdsManager: NSObject {
         }
         
         AdsConfig.interstitialAdShowCount = config.interstitialAdShowCount
+        AdsConfig.maxInterstitialAdsPerSession = config.maxInterstitialAdsPerSession
         
         AdsConfig.bannerAdErrorCount = config.bannerAdErrorCount
         AdsConfig.interstitialAdErrorCount = config.interstitialAdErrorCount

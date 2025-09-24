@@ -100,4 +100,9 @@ public struct AdsConfig {
         get { getInt(forKey: #function) }
         set { setInt(newValue, forKey: #function) }
     }
+    
+    static var maxInterstitialAdsPerSession: Int {
+        get { getInt(forKey: #function) }
+        set { setInt(newValue, forKey: #function) }
+    }
 }

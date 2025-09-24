@@ -9,6 +9,7 @@ public final class InterstitialAdManager: NSObject, FullScreenContentDelegate {
     private var interstitialAd: InterstitialAd?
     private var completionHandler: (() -> Void)?
     var displayCounter: Int = 0
+    var displayLimitCounter: Int = 0
     
     public func resetErrorCounter() {
         AdsConfig.currentInterstitialAdErrorCount = 0
@@ -107,14 +108,17 @@ public final class InterstitialAdManager: NSObject, FullScreenContentDelegate {
             return
         }
         
-        if displayCounter >= AdsConfig.interstitialAdShowCount {
-            displayCounter = 1
-            resetErrorCounter()
-            completionHandler = completion
-            ad.present(from: viewController)
-        } else {
-            displayCounter += 1
-            completion()
+        if displayLimitCounter < AdsConfig.maxInterstitialAdsPerSession {
+            if displayCounter >= AdsConfig.interstitialAdShowCount {
+                displayCounter = 1
+                displayLimitCounter += 1
+                resetErrorCounter()
+                completionHandler = completion
+                ad.present(from: viewController)
+            } else {
+                displayCounter += 1
+                completion()
+            }
         }
     }
     
