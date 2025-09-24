@@ -90,12 +90,46 @@ public final class AdsManager: NSObject {
         AdsConfig.interstitialAdErrorCount = config.interstitialAdErrorCount
         AdsConfig.nativeAdErrorCount = config.nativeAdErrorCount
         
-        requestUMPConsent { isConsent in
-            if self.canRequestAds {
-                self.loadOpenAd()
-                self.loadInterstitial()
-                self.preloadNativeAds()
+        requestATTAuthorization { _ in
+            Task { @MainActor in
+                self.requestUMPConsent { isConsent in
+                    let canRequest = ConsentInformation.shared.canRequestAds
+                    Task { @MainActor in
+                        if canRequest {
+                            self.loadOpenAd()
+                            self.loadInterstitial()
+                            self.preloadNativeAds()
+                        }
+                    }
+                }
             }
+        }
+        
+    }
+    
+    // Call this before setupAds
+    public func requestATTAuthorization(completion: @Sendable @escaping (Bool) -> Void) {
+        if #available(iOS 14, *) {
+            ATTrackingManager.requestTrackingAuthorization { status in
+                DispatchQueue.main.async {
+                    switch status {
+                    case .authorized:
+                        print("ATT authorized ✅")
+                        completion(true)
+                    case .denied:
+                        print("ATT denied ❌")
+                        completion(false)
+                    case .restricted, .notDetermined:
+                        print("ATT not determined/restricted ⚠️")
+                        completion(false)
+                    @unknown default:
+                        completion(false)
+                    }
+                }
+            }
+        } else {
+            // ATT not required below iOS 14
+            completion(true)
         }
     }
     
@@ -103,11 +137,11 @@ public final class AdsManager: NSObject {
       return ConsentInformation.shared.canRequestAds
     }
     
-    public func requestUMPConsent(completion: @escaping (Bool) -> Void) {
+    public func requestUMPConsent(completion: @Sendable @escaping (Bool) -> Void) {
         let parameters = RequestParameters()
         #if DEBUG
         let debugSettings = DebugSettings()
-        debugSettings.geography = .EEA
+        debugSettings.geography = .disabled
         parameters.debugSettings = debugSettings
         #endif
         ConsentInformation.shared.requestConsentInfoUpdate(with: parameters) { error in
@@ -135,7 +169,6 @@ public final class AdsManager: NSObject {
                             completion(false)
                             return
                         }
-                        completion(ConsentInformation.shared.canRequestAds)
                     }
                 } else {
                     completion(ConsentInformation.shared.canRequestAds)
