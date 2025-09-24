@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "AdsManager",
     platforms: [
-        .iOS(.v14) // <- minimum iOS version is 14
+        .iOS(.v15) // <- minimum iOS version is 15
     ],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.

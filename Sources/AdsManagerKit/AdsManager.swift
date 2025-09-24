@@ -10,18 +10,18 @@ public struct AdsConfiguration {
     public var interstitialAdEnabled: Bool
     public var nativeAdEnabled: Bool
     public var nativeAdPreloadEnabled: Bool
-
+    
     public var appOpenAdUnitId: String
     public var bannerAdUnitId: String
     public var interstitialAdUnitId: String
     public var nativeAdUnitId: String
-
-    public var interstitialAdShowCount: Int = 4
-
-    public var bannerAdErrorCount: Int = 3
-    public var interstitialAdErrorCount: Int = 3
-    public var nativeAdErrorCount: Int = 3
-
+    
+    public var interstitialAdShowCount: Int
+    
+    public var bannerAdErrorCount: Int
+    public var interstitialAdErrorCount: Int
+    public var nativeAdErrorCount: Int
+    
     public init(
         isProduction: Bool,
         appOpenAdEnabled: Bool,
@@ -58,6 +58,25 @@ public struct AdsConfiguration {
 @MainActor
 public final class AdsManager: NSObject {
     
+    private var pendingTrackingCompletion: (() -> Void)?
+    
+    private lazy var sceneDidActivateObserver: NSObjectProtocol = {
+        NotificationCenter.default.addObserver(
+            forName: UIScene.didActivateNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            if #available(iOS 14, *) {
+                ATTrackingManager.requestTrackingAuthorization { _ in
+                    Task { @MainActor [weak self] in
+                        self?.pendingTrackingCompletion?()
+                        self?.pendingTrackingCompletion = nil
+                    }
+                }
+            }
+        }
+    }()
+    
     public static let shared = AdsManager()
     
     public func setupAds(with config: AdsConfiguration) {
@@ -67,7 +86,7 @@ public final class AdsManager: NSObject {
         AdsConfig.interstitialAdEnabled = config.interstitialAdEnabled
         AdsConfig.nativeAdEnabled = config.nativeAdEnabled
         AdsConfig.nativeAdPreloadEnabled = config.nativeAdPreloadEnabled
-
+        
         if AdsConfig.isProduction {
             AdsConfig.appOpenAdUnitId = config.appOpenAdUnitId
             AdsConfig.bannerAdUnitId = config.bannerAdUnitId
@@ -79,9 +98,9 @@ public final class AdsManager: NSObject {
             AdsConfig.interstitialAdUnitId = "ca-app-pub-3940256099942544/4411468910"
             AdsConfig.nativeAdUnitId = "ca-app-pub-3940256099942544/3986624511"
         }
-
+        
         AdsConfig.interstitialAdShowCount = config.interstitialAdShowCount
-
+        
         AdsConfig.bannerAdErrorCount = config.bannerAdErrorCount
         AdsConfig.interstitialAdErrorCount = config.interstitialAdErrorCount
         AdsConfig.nativeAdErrorCount = config.nativeAdErrorCount
@@ -92,19 +111,19 @@ public final class AdsManager: NSObject {
     }
     
     public func requestAppTrackingPermission(completion: @escaping () -> Void) {
-        if #available(iOS 14, *) {
-            ATTrackingManager.requestTrackingAuthorization { status in
-                DispatchQueue.main.async {
-                    print("ATT Status: \(status.rawValue)")
-                    
-                    // Small delay before running completion
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        completion()
-                    }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            if #available(iOS 14, *) {
+                guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                      scene.activationState == .foregroundActive else {
+                    self.pendingTrackingCompletion = completion
+                    _ = self.sceneDidActivateObserver
+                    return
                 }
-            }
-        } else {
-            DispatchQueue.main.async {
+
+                ATTrackingManager.requestTrackingAuthorization { _ in
+                    completion()
+                }
+            } else {
                 completion()
             }
         }
@@ -112,11 +131,11 @@ public final class AdsManager: NSObject {
     
     public func requestUMPConsent(completion: @escaping (Bool) -> Void) {
         let parameters = RequestParameters()
-#if DEBUG
+        #if DEBUG
         let debugSettings = DebugSettings()
         debugSettings.geography = DebugGeography.EEA
         parameters.debugSettings = debugSettings
-#endif
+        #endif
         ConsentInformation.shared.requestConsentInfoUpdate(with: parameters) { error in
             if let error = error {
                 print("UMP Consent request failed: \(error.localizedDescription)")
@@ -156,7 +175,7 @@ public final class AdsManager: NSObject {
         InterstitialAdManager.shared.resetErrorCounter()
         NativeAdManager.shared.resetErrorCounter()
     }
- 
+    
     // MARK: - App Open Ad
     public func loadOpenAd() {
         AppOpenAdManager.shared.loadOpenAd()
@@ -175,14 +194,14 @@ public final class AdsManager: NSObject {
                                  completion: @escaping () -> Void) {
         InterstitialAdManager.shared.showAd(from: viewController, completion: completion)
     }
-
+    
     // MARK: - Banner Ad
     public func loadBanner(in containerView: UIView,
                            rootViewController: UIViewController,
                            completion: @escaping (Bool) -> Void) {
         BannerAdManager.shared.loadBannerAd(in: containerView, vc: rootViewController, completion: completion)
     }
-
+    
     // MARK: - Native Ad
     public func preloadNativeAds() {
         NativeAdManager.shared.preloadNativeAds()
