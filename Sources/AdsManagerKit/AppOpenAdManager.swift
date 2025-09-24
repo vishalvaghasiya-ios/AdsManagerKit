@@ -75,26 +75,28 @@ public final class AppOpenAdManager: NSObject {
     }
     
     func loadOpenAd() {
-        if isLoadingAd || isAdAvailable() {
-            return
-        }
-        if AdsConfig.appOpenAdEnabled {
-            isLoadingAd = true
-            AppOpenAd.load(with: AdsConfig.appOpenAdUnitId, request: Request()) { [weak self] ad, error in
-                Task { @MainActor in
-                    guard let self else { return }
-                    if let error = error {
+        if AdsManager.shared.canRequestAds {
+            if isLoadingAd || isAdAvailable() {
+                return
+            }
+            if AdsConfig.appOpenAdEnabled {
+                isLoadingAd = true
+                AppOpenAd.load(with: AdsConfig.appOpenAdUnitId, request: Request()) { [weak self] ad, error in
+                    Task { @MainActor in
+                        guard let self else { return }
+                        if let error = error {
+                            self.isLoadingAd = false
+                            self.appOpenAd = nil
+                            self.adLoadTime = nil
+                            print("[AppOpenAd] Failed to load: \(error)")
+                            return
+                        }
+                        self.appOpenAd = ad
+                        self.appOpenAd?.fullScreenContentDelegate = self
+                        self.adLoadTime = Date()
                         self.isLoadingAd = false
-                        self.appOpenAd = nil
-                        self.adLoadTime = nil
-                        print("[AppOpenAd] Failed to load: \(error)")
-                        return
+                        print("[AppOpenAd] loaded.")
                     }
-                    self.appOpenAd = ad
-                    self.appOpenAd?.fullScreenContentDelegate = self
-                    self.adLoadTime = Date()
-                    self.isLoadingAd = false
-                    print("[AppOpenAd] loaded.")
                 }
             }
         }

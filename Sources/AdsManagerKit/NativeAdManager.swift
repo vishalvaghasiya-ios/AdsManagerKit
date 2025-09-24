@@ -104,26 +104,30 @@ final class NativeAdManager: NSObject {
     
     // MARK: - Internal Ad Loader
     private func loadAd(completion: ((NativeAd?) -> Void)? = nil) {
-        if !AdsConfig.nativeAdEnabled {
+        if AdsManager.shared.canRequestAds {
+            if !AdsConfig.nativeAdEnabled {
+                self.completionHandler?(false)
+                return
+            }
+            guard !hasExceededErrorLimit() else {
+                print("[NativeAd] ⚠️ Max error attempts reached — not loading.")
+                self.completionHandler?(false)
+                return
+            }
+            
+            let adLoader = AdLoader(adUnitID: AdsConfig.nativeAdUnitId,
+                                    rootViewController: nil,
+                                    adTypes: [.native],
+                                    options: nil)
+            if let completion = completion {
+                completionHandlers[adLoader] = completion
+            }
+            adLoader.delegate = self
+            activeAdLoaders.append(adLoader)
+            adLoader.load(Request())
+        } else {
             self.completionHandler?(false)
-            return
         }
-        guard !hasExceededErrorLimit() else {
-            print("[NativeAd] ⚠️ Max error attempts reached — not loading.")
-            self.completionHandler?(false)
-            return
-        }
-        
-        let adLoader = AdLoader(adUnitID: AdsConfig.nativeAdUnitId,
-                                rootViewController: nil,
-                                adTypes: [.native],
-                                options: nil)
-        if let completion = completion {
-            completionHandlers[adLoader] = completion
-        }
-        adLoader.delegate = self
-        activeAdLoaders.append(adLoader)
-        adLoader.load(Request())
     }
     
 }

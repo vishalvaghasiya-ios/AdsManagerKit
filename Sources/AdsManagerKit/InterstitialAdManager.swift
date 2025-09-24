@@ -23,72 +23,78 @@ public final class InterstitialAdManager: NSObject, FullScreenContentDelegate {
     }
     
     public func loadAndShow(completion: @escaping () -> Void) {
-        self.completionHandler = completion
-        
-        if let ad = interstitialAd {
-            print("[InterstitialAd] already loaded — presenting directly.")
-            ad.present(from: nil)
-            return
-        }
-        
-        guard !hasExceededErrorLimit() else {
-            print("[InterstitialAd] ⚠️ Max retries exceeded — not loading or showing.")
-            completion()
-            return
-        }
-        
-        let request = Request()
-        InterstitialAd.load(
-            with: AdsConfig.interstitialAdUnitId,
-            request: request
-        ) { [weak self] ad, error in
-            Task { @MainActor [weak self] in
-                guard let self = self else { return }
-                
-                if let error = error {
-                    print("[InterstitialAd] Failed to load: \(error.localizedDescription)")
-                    self.incrementErrorCounter()
-                    self.completionHandler?()
-                    return
-                }
-                
-                self.resetErrorCounter()
-                
-                self.interstitialAd = ad
-                self.interstitialAd?.fullScreenContentDelegate = self
-                ad?.present(from: nil)
+        if AdsManager.shared.canRequestAds {
+            self.completionHandler = completion
+            
+            if let ad = interstitialAd {
+                print("[InterstitialAd] already loaded — presenting directly.")
+                ad.present(from: nil)
+                return
             }
+            
+            guard !hasExceededErrorLimit() else {
+                print("[InterstitialAd] ⚠️ Max retries exceeded — not loading or showing.")
+                completion()
+                return
+            }
+            
+            let request = Request()
+            InterstitialAd.load(
+                with: AdsConfig.interstitialAdUnitId,
+                request: request
+            ) { [weak self] ad, error in
+                Task { @MainActor [weak self] in
+                    guard let self = self else { return }
+                    
+                    if let error = error {
+                        print("[InterstitialAd] Failed to load: \(error.localizedDescription)")
+                        self.incrementErrorCounter()
+                        self.completionHandler?()
+                        return
+                    }
+                    
+                    self.resetErrorCounter()
+                    
+                    self.interstitialAd = ad
+                    self.interstitialAd?.fullScreenContentDelegate = self
+                    ad?.present(from: nil)
+                }
+            }
+        } else {
+            completion()
         }
     }
     
     /// Load the interstitial ad
     func loadAd() {
-        guard !hasExceededErrorLimit() else {
-            print("[InterstitialAd] ⚠️ Max error attempts reached — not loading.")
-            return
-        }
-        
-        if !AdsConfig.interstitialAdEnabled {
-            return
-        }
-        
-        guard interstitialAd == nil else { return }
-        
-        let request = Request()
-        InterstitialAd.load(with: AdsConfig.interstitialAdUnitId, request: request) { [weak self] ad, error in
-            Task { @MainActor [weak self] in
-                guard let self = self else { return }
-                
-                if let error = error {
-                    print("[InterstitialAd] Failed to load: \(error.localizedDescription)")
-                    self.incrementErrorCounter()
-                    return
+        if AdsManager.shared.canRequestAds {
+            guard !hasExceededErrorLimit() else {
+                print("[InterstitialAd] ⚠️ Max error attempts reached — not loading.")
+                return
+            }
+            
+            if !AdsConfig.interstitialAdEnabled {
+                return
+            }
+            
+            guard interstitialAd == nil else { return }
+            
+            let request = Request()
+            InterstitialAd.load(with: AdsConfig.interstitialAdUnitId, request: request) { [weak self] ad, error in
+                Task { @MainActor [weak self] in
+                    guard let self = self else { return }
+                    
+                    if let error = error {
+                        print("[InterstitialAd] Failed to load: \(error.localizedDescription)")
+                        self.incrementErrorCounter()
+                        return
+                    }
+                    
+                    self.resetErrorCounter()
+                    self.interstitialAd = ad
+                    self.interstitialAd?.fullScreenContentDelegate = self
+                    print("[InterstitialAd] loaded and ready.")
                 }
-                
-                self.resetErrorCounter()
-                self.interstitialAd = ad
-                self.interstitialAd?.fullScreenContentDelegate = self
-                print("[InterstitialAd] loaded and ready.")
             }
         }
     }
