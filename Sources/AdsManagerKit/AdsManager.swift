@@ -67,10 +67,12 @@ public final class AdsManager: NSObject {
             queue: .main
         ) { [weak self] _ in
             if #available(iOS 14, *) {
-                ATTrackingManager.requestTrackingAuthorization { _ in
-                    Task { @MainActor [weak self] in
-                        self?.pendingTrackingCompletion?()
-                        self?.pendingTrackingCompletion = nil
+                DispatchQueue.main.async {
+                    ATTrackingManager.requestTrackingAuthorization { _ in
+                        DispatchQueue.main.async {
+                            self?.pendingTrackingCompletion?()
+                            self?.pendingTrackingCompletion = nil
+                        }
                     }
                 }
             }
@@ -112,12 +114,6 @@ public final class AdsManager: NSObject {
                 self.preloadNativeAds()
             }
         }
-        
-        if canRequestAds {
-            self.loadOpenAd()
-            self.loadInterstitial()
-            self.preloadNativeAds()
-        }
     }
     
     public func requestAppTrackingPermission(completion: @escaping () -> Void) {
@@ -131,7 +127,9 @@ public final class AdsManager: NSObject {
                 }
 
                 ATTrackingManager.requestTrackingAuthorization { _ in
-                    completion()
+                    DispatchQueue.main.async {
+                        completion()
+                    }
                 }
             } else {
                 completion()
@@ -147,7 +145,7 @@ public final class AdsManager: NSObject {
         let parameters = RequestParameters()
         #if DEBUG
         let debugSettings = DebugSettings()
-        debugSettings.geography = DebugGeography.EEA
+        debugSettings.geography = .EEA
         parameters.debugSettings = debugSettings
         #endif
         ConsentInformation.shared.requestConsentInfoUpdate(with: parameters) { error in
@@ -175,10 +173,10 @@ public final class AdsManager: NSObject {
                             completion(false)
                             return
                         }
-                        completion(ConsentInformation.shared.consentStatus == .obtained)
+                        completion(ConsentInformation.shared.canRequestAds)
                     }
                 } else {
-                    completion(ConsentInformation.shared.consentStatus == .obtained)
+                    completion(ConsentInformation.shared.canRequestAds)
                 }
             }
         }
