@@ -105,9 +105,17 @@ public final class AdsManager: NSObject {
         AdsConfig.interstitialAdErrorCount = config.interstitialAdErrorCount
         AdsConfig.nativeAdErrorCount = config.nativeAdErrorCount
         
-        self.loadOpenAd()
-        self.loadInterstitial()
-        self.preloadNativeAds()
+        requestUMPConsent { isConsent in
+            self.loadOpenAd()
+            self.loadInterstitial()
+            self.preloadNativeAds()
+        }
+        
+        if canRequestAds {
+            self.loadOpenAd()
+            self.loadInterstitial()
+            self.preloadNativeAds()
+        }
     }
     
     public func requestAppTrackingPermission(completion: @escaping () -> Void) {
