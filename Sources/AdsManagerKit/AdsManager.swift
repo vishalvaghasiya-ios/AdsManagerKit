@@ -94,6 +94,7 @@ public final class AdsManager: NSObject {
             Task { @MainActor in
                 self.requestUMPConsent { isConsent in
                     let canRequest = ConsentInformation.shared.canRequestAds
+                    MobileAds.shared.start()
                     Task { @MainActor in
                         if canRequest {
                             self.loadInterstitial()
