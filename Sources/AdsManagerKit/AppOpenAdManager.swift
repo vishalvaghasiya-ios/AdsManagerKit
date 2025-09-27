@@ -43,11 +43,6 @@ public final class AppOpenAdManager: NSObject {
                 return
             }
             
-            if !AdsConfig.openAdEnabled {
-                completion()
-                return
-            }
-            
             if !AdsConfig.openAdOnLaunchEnabled {
                 completion()
                 return
