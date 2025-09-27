@@ -5,10 +5,12 @@ import GoogleMobileAds
 import UserMessagingPlatform
 public struct AdsConfiguration {
     public var isProduction: Bool
+    
     public var appOpenAdEnabled: Bool
     public var bannerAdEnabled: Bool
     public var interstitialAdEnabled: Bool
     public var nativeAdEnabled: Bool
+    
     public var nativeAdPreloadEnabled: Bool
     public var appOpenAdOnLaunchEnabled: Bool
     
@@ -26,35 +28,45 @@ public struct AdsConfiguration {
     
     public init(
         isProduction: Bool,
+        
         appOpenAdEnabled: Bool,
         bannerAdEnabled: Bool,
         interstitialAdEnabled: Bool,
         nativeAdEnabled: Bool,
+        
         nativeAdPreloadEnabled: Bool,
         appOpenAdOnLaunchEnabled: Bool,
+        
         appOpenAdUnitId: String,
         bannerAdUnitId: String,
         interstitialAdUnitId: String,
         nativeAdUnitId: String,
+        
         interstitialAdShowCount: Int = 4,
         maxInterstitialAdsPerSession: Int = 50,
-        bannerAdErrorCount: Int = 3,
-        interstitialAdErrorCount: Int = 3,
-        nativeAdErrorCount: Int = 3
+        
+        bannerAdErrorCount: Int = 7,
+        interstitialAdErrorCount: Int = 7,
+        nativeAdErrorCount: Int = 7
     ) {
         self.isProduction = isProduction
+        
         self.appOpenAdEnabled = appOpenAdEnabled
         self.bannerAdEnabled = bannerAdEnabled
         self.interstitialAdEnabled = interstitialAdEnabled
         self.nativeAdEnabled = nativeAdEnabled
+        
         self.nativeAdPreloadEnabled = nativeAdPreloadEnabled
         self.appOpenAdOnLaunchEnabled = appOpenAdOnLaunchEnabled
+        
         self.appOpenAdUnitId = appOpenAdUnitId
         self.bannerAdUnitId = bannerAdUnitId
         self.interstitialAdUnitId = interstitialAdUnitId
         self.nativeAdUnitId = nativeAdUnitId
+        
         self.interstitialAdShowCount = interstitialAdShowCount
         self.maxInterstitialAdsPerSession = maxInterstitialAdsPerSession
+        
         self.bannerAdErrorCount = bannerAdErrorCount
         self.interstitialAdErrorCount = interstitialAdErrorCount
         self.nativeAdErrorCount = nativeAdErrorCount
@@ -64,53 +76,85 @@ public struct AdsConfiguration {
 @MainActor
 public final class AdsManager: NSObject {
     
-    public static let shared = AdsManager()
+    /// Configure all ad settings at once
+    /// - Parameters:
+    ///   - isProduction: True for production AdMob IDs, false for test IDs
+    ///   - appOpenAdEnabled: Enable App Open Ads
+    ///   - bannerAdEnabled: Enable Banner Ads
+    ///   - interstitialAdEnabled: Enable Interstitial Ads
+    ///   - nativeAdEnabled: Enable Native Ads
+    ///   - nativeAdPreloadEnabled: Preload native ads in advance
+    ///   - appOpenAdUnitId: Optional App Open Ad Unit ID (default uses placeholder/test ID)
+    ///   - bannerAdUnitId: Optional Banner Ad Unit ID (default uses placeholder/test ID)
+    ///   - interstitialAdUnitId: Optional Interstitial Ad Unit ID
+    ///   - nativeAdUnitId: Optional Native Ad Unit ID
+    ///   - interstitialAdShowCount: Max times interstitial can show per session (default 4)
+    ///   - maxInterstitialAdsPerSession: Max interstitials per session (default 50)
+    ///   - bannerAdErrorCount: Max banner error count (default 7)
+    ///   - interstitialAdErrorCount: Max interstitial error count (default 7)
+    ///   - nativeAdErrorCount: Max native ad error count (default 7)
+    public static func configureAds(
+        isProduction: Bool,
+        appOpenAdEnabled: Bool,
+        bannerAdEnabled: Bool,
+        interstitialAdEnabled: Bool,
+        nativeAdEnabled: Bool,
+        nativeAdPreloadEnabled: Bool,
+        appOpenAdUnitId: String? = nil,
+        bannerAdUnitId: String? = nil,
+        interstitialAdUnitId: String? = nil,
+        nativeAdUnitId: String? = nil,
+        interstitialAdShowCount: Int = 4,
+        maxInterstitialAdsPerSession: Int = 50,
+        bannerAdErrorCount: Int = 7,
+        interstitialAdErrorCount: Int = 7,
+        nativeAdErrorCount: Int = 7,
+        completion: @Sendable @escaping () -> Void
+    ) {
+        // Configure AdsConfig with provided or default values
+        AdsConfig.isProduction = isProduction
+        AdsConfig.appOpenAdEnabled = appOpenAdEnabled
+        AdsConfig.bannerAdEnabled = bannerAdEnabled
+        AdsConfig.interstitialAdEnabled = interstitialAdEnabled
+        AdsConfig.nativeAdEnabled = nativeAdEnabled
+        AdsConfig.nativeAdPreloadEnabled = nativeAdPreloadEnabled
+        
+        AdsConfig.appOpenAdUnitId = appOpenAdUnitId ?? "ca-app-pub-3940256099942544/3419835294"
+        AdsConfig.bannerAdUnitId = bannerAdUnitId ?? "ca-app-pub-3940256099942544/2934735716"
+        AdsConfig.interstitialAdUnitId = interstitialAdUnitId ?? "ca-app-pub-3940256099942544/4411468910"
+        AdsConfig.nativeAdUnitId = nativeAdUnitId ?? "ca-app-pub-3940256099942544/3986624511"
+        
+        AdsConfig.interstitialAdShowCount = interstitialAdShowCount
+        AdsConfig.maxInterstitialAdsPerSession = maxInterstitialAdsPerSession
+        
+        AdsConfig.bannerAdErrorCount = bannerAdErrorCount
+        AdsConfig.interstitialAdErrorCount = interstitialAdErrorCount
+        AdsConfig.nativeAdErrorCount = nativeAdErrorCount
+        
+        // Request ATT and UMP consent, then start MobileAds
+        AdsManager.configure(completion)
+    }
     
-    public func setupAds(with config: AdsConfiguration, completion: @Sendable @escaping () -> Void) {
-        AdsConfig.isProduction = config.isProduction
-        AdsConfig.appOpenAdEnabled = config.appOpenAdEnabled
-        AdsConfig.bannerAdEnabled = config.bannerAdEnabled
-        AdsConfig.interstitialAdEnabled = config.interstitialAdEnabled
-        AdsConfig.nativeAdEnabled = config.nativeAdEnabled
-        AdsConfig.nativeAdPreloadEnabled = config.nativeAdPreloadEnabled
-        AdsConfig.appOpenAdOnLaunchEnabled = config.appOpenAdOnLaunchEnabled
-        
-        if AdsConfig.isProduction {
-            AdsConfig.appOpenAdUnitId = config.appOpenAdUnitId
-            AdsConfig.bannerAdUnitId = config.bannerAdUnitId
-            AdsConfig.interstitialAdUnitId = config.interstitialAdUnitId
-            AdsConfig.nativeAdUnitId = config.nativeAdUnitId
-        } else {
-            AdsConfig.appOpenAdUnitId = "ca-app-pub-3940256099942544/5575463023"
-            AdsConfig.bannerAdUnitId = "ca-app-pub-3940256099942544/2934735716"
-            AdsConfig.interstitialAdUnitId = "ca-app-pub-3940256099942544/4411468910"
-            AdsConfig.nativeAdUnitId = "ca-app-pub-3940256099942544/3986624511"
-        }
-        
-        AdsConfig.interstitialAdShowCount = config.interstitialAdShowCount
-        AdsConfig.maxInterstitialAdsPerSession = config.maxInterstitialAdsPerSession
-        
-        AdsConfig.bannerAdErrorCount = config.bannerAdErrorCount
-        AdsConfig.interstitialAdErrorCount = config.interstitialAdErrorCount
-        AdsConfig.nativeAdErrorCount = config.nativeAdErrorCount
-        
-        requestATTAuthorization { _ in
+    public static func configure(_ completion: @Sendable @escaping () -> Void) {
+        // Request ATT first, then UMP consent
+        AdsManager.shared.requestATTAuthorization { _ in
             Task { @MainActor in
-                self.requestUMPConsent { isConsent in
-                    let canRequest = ConsentInformation.shared.canRequestAds
+                AdsManager.shared.requestUMPConsent { _ in
                     MobileAds.shared.start()
                     Task { @MainActor in
-                        if canRequest {
-                            self.loadInterstitial()
-                            self.preloadNativeAds()
+                        if ConsentInformation.shared.canRequestAds {
+                            // Load initial ads if allowed
+                            AdsManager.shared.loadInterstitial()
+                            AdsManager.shared.preloadNativeAds()
                         }
                         completion()
                     }
                 }
             }
         }
-        
     }
+    
+    public static let shared = AdsManager()
     
     // Call this before setupAds
     public func requestATTAuthorization(completion: @Sendable @escaping (Bool) -> Void) {
@@ -139,7 +183,7 @@ public final class AdsManager: NSObject {
     }
     
     public var canRequestAds: Bool {
-      return ConsentInformation.shared.canRequestAds
+        return ConsentInformation.shared.canRequestAds
     }
     
     public func requestUMPConsent(completion: @Sendable @escaping (Bool) -> Void) {

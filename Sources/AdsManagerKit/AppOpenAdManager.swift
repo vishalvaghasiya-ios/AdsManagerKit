@@ -37,56 +37,59 @@ public final class AppOpenAdManager: NSObject {
     
     public func loadAndShow(completion: @escaping @Sendable () -> Void) {
         self.appOpenAdManagerAdDidComplete = completion
-        
-        if isLoadingAd || isAdAvailable() {
-            completion()
-            return
-        }
-        
-        if !AdsConfig.appOpenAdEnabled {
-            completion()
-            return
-        }
-        
-        if !AdsConfig.appOpenAdOnLaunchEnabled {
-            completion()
-            return
-        }
-        
-        if let ad = appOpenAd {
-            print("[AppOpenAd] will be displayed.")
-            isShowingAd = true
-            ad.present(from: nil)
-        } else {
-            isLoadingAd = true
-            let request = Request()
-            AppOpenAd.load(
-                with: AdsConfig.appOpenAdUnitId,
-                request: request
-            ) { [weak self] ad, error in
-                Task { @MainActor in
-                    guard let self else { return }
-                    if let error = error {
-                        self.isLoadingAd = false
-                        self.appOpenAd = nil
-                        self.adLoadTime = nil
-                        if !self.didFirstLoadFail {
-                            self.didFirstLoadFail = true
-                            self.loadAndShow(completion: completion)
-                        } else {
-                            completion()
+        if AdsManager.shared.canRequestAds {
+            if isLoadingAd || isAdAvailable() {
+                completion()
+                return
+            }
+            
+            if !AdsConfig.appOpenAdEnabled {
+                completion()
+                return
+            }
+            
+            if !AdsConfig.appOpenAdOnLaunchEnabled {
+                completion()
+                return
+            }
+            
+            if let ad = appOpenAd {
+                print("[AppOpenAd] will be displayed.")
+                isShowingAd = true
+                ad.present(from: nil)
+            } else {
+                isLoadingAd = true
+                let request = Request()
+                AppOpenAd.load(
+                    with: AdsConfig.appOpenAdUnitId,
+                    request: request
+                ) { [weak self] ad, error in
+                    Task { @MainActor in
+                        guard let self else { return }
+                        if let error = error {
+                            self.isLoadingAd = false
+                            self.appOpenAd = nil
+                            self.adLoadTime = nil
+                            if !self.didFirstLoadFail {
+                                self.didFirstLoadFail = true
+                                self.loadAndShow(completion: completion)
+                            } else {
+                                completion()
+                            }
+                            print("[AppOpenAd] Failed to load: \(error)")
+                            return
                         }
-                        print("[AppOpenAd] Failed to load: \(error)")
-                        return
+                        self.appOpenAd = ad
+                        self.appOpenAd?.fullScreenContentDelegate = self
+                        self.adLoadTime = Date()
+                        self.isLoadingAd = false
+                        print("[AppOpenAd] loaded.")
+                        self.appOpenAd?.present(from: nil)
                     }
-                    self.appOpenAd = ad
-                    self.appOpenAd?.fullScreenContentDelegate = self
-                    self.adLoadTime = Date()
-                    self.isLoadingAd = false
-                    print("[AppOpenAd] loaded.")
-                    self.appOpenAd?.present(from: nil)
                 }
             }
+        } else {
+            completion()
         }
     }
     

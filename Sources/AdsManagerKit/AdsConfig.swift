@@ -3,26 +3,8 @@ import UIKit
 
 public struct AdsConfig {
 
-    // MARK: - Private helpers
-    private static func getString(forKey key: String) -> String {
-        return UserDefaults.standard.string(forKey: key) ?? ""
-    }
-
-    private static func setString(_ value: String, forKey key: String) {
-        UserDefaults.standard.set(value, forKey: key)
-    }
-
-    private static func getInt(forKey key: String) -> Int {
-        return UserDefaults.standard.integer(forKey: key)
-    }
-
-    private static func setInt(_ value: Int, forKey key: String) {
-        UserDefaults.standard.set(value, forKey: key)
-    }
-
-    // MARK: - Ad Preferences
-
-    // MARK: - Environment
+    // MARK: - Environment Settings
+    // Controls the general ad behavior and feature toggles for the app
     static var isProduction: Bool {
         get { UserDefaults.standard.bool(forKey: #function) }
         set { UserDefaults.standard.set(newValue, forKey: #function) }
@@ -58,56 +40,60 @@ public struct AdsConfig {
         set { UserDefaults.standard.set(newValue, forKey: #function) }
     }
     
-    // MARK: - Ad Unit IDs
+    // MARK: - Ad Unit Identifiers
+    // Stores the AdMob unit IDs for each ad format
     static var appOpenAdUnitId: String {
-        get { getString(forKey: #function) }
-        set { setString(newValue, forKey: #function) }
+        get { isProduction ? UserDefaults.standard.string(forKey: #function) ?? "" : "ca-app-pub-3940256099942544/5575463023" }
+        set { UserDefaults.standard.set(newValue, forKey: #function) }
     }
 
     static var bannerAdUnitId: String {
-        get { getString(forKey: #function) }
-        set { setString(newValue, forKey: #function) }
+        get { isProduction ? UserDefaults.standard.string(forKey: #function) ?? "" : "ca-app-pub-3940256099942544/2934735716" }
+        set { UserDefaults.standard.set(newValue, forKey: #function) }
     }
 
     static var interstitialAdUnitId: String {
-        get { getString(forKey: #function) }
-        set { setString(newValue, forKey: #function) }
+        get { isProduction ? UserDefaults.standard.string(forKey: #function) ?? "" : "ca-app-pub-3940256099942544/4411468910" }
+        set { UserDefaults.standard.set(newValue, forKey: #function) }
     }
 
     static var nativeAdUnitId: String {
-        get { getString(forKey: #function) }
-        set { setString(newValue, forKey: #function) }
+        get { isProduction ? UserDefaults.standard.string(forKey: #function) ?? "" : "ca-app-pub-3940256099942544/3986624511" }
+        set { UserDefaults.standard.set(newValue, forKey: #function) }
     }
 
-    // MARK: - Persistent Ad Error Counts
+    // MARK: - Persistent Ad Error Counters
+    // Tracks total errors across app launches for banners, interstitials, and native ads
     static var bannerAdErrorCount: Int {
-        get { getInt(forKey: #function) }
-        set { setInt(newValue, forKey: #function) }
+        get { UserDefaults.standard.integer(forKey: #function) }
+        set { UserDefaults.standard.set(newValue, forKey: #function) }
     }
     
     static var interstitialAdErrorCount: Int {
-        get { getInt(forKey: #function) }
-        set { setInt(newValue, forKey: #function) }
+        get { UserDefaults.standard.integer(forKey: #function) }
+        set { UserDefaults.standard.set(newValue, forKey: #function) }
     }
     
     static var nativeAdErrorCount: Int {
-        get { getInt(forKey: #function) }
-        set { setInt(newValue, forKey: #function) }
+        get { UserDefaults.standard.integer(forKey: #function) }
+        set { UserDefaults.standard.set(newValue, forKey: #function) }
     }
 
-    // MARK: - Current Ad Error Counters (resets on app restart)
-    nonisolated(unsafe) static var currentBannerAdErrorCount: Int = 0
-    nonisolated(unsafe) static var currentInterstitialAdErrorCount: Int = 0
-    nonisolated(unsafe) static var currentNativeAdErrorCount: Int = 0
-    
-    // MARK: - Interstitial Ad Counters
+    // MARK: - Interstitial Ad Session Counters
+    // Tracks interstitial ad display counts for session limits
     static var interstitialAdShowCount: Int {
-        get { getInt(forKey: #function) }
-        set { setInt(newValue, forKey: #function) }
+        get { UserDefaults.standard.integer(forKey: #function) }
+        set { UserDefaults.standard.set(newValue, forKey: #function) }
     }
     
     static var maxInterstitialAdsPerSession: Int {
-        get { getInt(forKey: #function) }
-        set { setInt(newValue, forKey: #function) }
+        get { UserDefaults.standard.integer(forKey: #function) }
+        set { UserDefaults.standard.set(newValue, forKey: #function) }
     }
+    
+    // MARK: - Current Session Ad Error Counters
+    // Resets on each app launch; used to track errors during the current session
+    nonisolated(unsafe) static var currentBannerAdErrorCount: Int = 0
+    nonisolated(unsafe) static var currentInterstitialAdErrorCount: Int = 0
+    nonisolated(unsafe) static var currentNativeAdErrorCount: Int = 0
 }
