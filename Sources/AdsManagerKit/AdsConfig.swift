@@ -53,6 +53,11 @@ public struct AdsConfig {
         set { UserDefaults.standard.set(newValue, forKey: #function) }
     }
 
+    static var appOpenAdOnLaunchEnabled: Bool {
+        get { UserDefaults.standard.bool(forKey: #function) }
+        set { UserDefaults.standard.set(newValue, forKey: #function) }
+    }
+    
     // MARK: - Ad Unit IDs
     static var appOpenAdUnitId: String {
         get { getString(forKey: #function) }

@@ -10,6 +10,7 @@ public struct AdsConfiguration {
     public var interstitialAdEnabled: Bool
     public var nativeAdEnabled: Bool
     public var nativeAdPreloadEnabled: Bool
+    public var appOpenAdOnLaunchEnabled: Bool
     
     public var appOpenAdUnitId: String
     public var bannerAdUnitId: String
@@ -30,6 +31,7 @@ public struct AdsConfiguration {
         interstitialAdEnabled: Bool,
         nativeAdEnabled: Bool,
         nativeAdPreloadEnabled: Bool,
+        appOpenAdOnLaunchEnabled: Bool,
         appOpenAdUnitId: String,
         bannerAdUnitId: String,
         interstitialAdUnitId: String,
@@ -46,6 +48,7 @@ public struct AdsConfiguration {
         self.interstitialAdEnabled = interstitialAdEnabled
         self.nativeAdEnabled = nativeAdEnabled
         self.nativeAdPreloadEnabled = nativeAdPreloadEnabled
+        self.appOpenAdOnLaunchEnabled = appOpenAdOnLaunchEnabled
         self.appOpenAdUnitId = appOpenAdUnitId
         self.bannerAdUnitId = bannerAdUnitId
         self.interstitialAdUnitId = interstitialAdUnitId
@@ -70,6 +73,7 @@ public final class AdsManager: NSObject {
         AdsConfig.interstitialAdEnabled = config.interstitialAdEnabled
         AdsConfig.nativeAdEnabled = config.nativeAdEnabled
         AdsConfig.nativeAdPreloadEnabled = config.nativeAdPreloadEnabled
+        AdsConfig.appOpenAdOnLaunchEnabled = config.appOpenAdOnLaunchEnabled
         
         if AdsConfig.isProduction {
             AdsConfig.appOpenAdUnitId = config.appOpenAdUnitId

@@ -48,6 +48,11 @@ public final class AppOpenAdManager: NSObject {
             return
         }
         
+        if !AdsConfig.appOpenAdOnLaunchEnabled {
+            completion()
+            return
+        }
+        
         if let ad = appOpenAd {
             print("[AppOpenAd] will be displayed.")
             isShowingAd = true
