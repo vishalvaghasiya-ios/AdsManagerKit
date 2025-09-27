@@ -9,12 +9,13 @@ public final class AdsManager: NSObject {
     /// Configure all ad settings at once
     /// - Parameters:
     ///   - isProduction: True for production AdMob IDs, false for test IDs
-    ///   - appOpenAdEnabled: Enable App Open Ads
+    ///   - openAdEnabled: Enable App Open Ads
+    ///   - openAdOnLaunchEnabled: Enable Open Ads on Launch
     ///   - bannerAdEnabled: Enable Banner Ads
     ///   - interstitialAdEnabled: Enable Interstitial Ads
     ///   - nativeAdEnabled: Enable Native Ads
     ///   - nativeAdPreloadEnabled: Preload native ads in advance
-    ///   - appOpenAdUnitId: Optional App Open Ad Unit ID (default uses placeholder/test ID)
+    ///   - openAdUnitId: Optional App Open Ad Unit ID (default uses placeholder/test ID)
     ///   - bannerAdUnitId: Optional Banner Ad Unit ID (default uses placeholder/test ID)
     ///   - interstitialAdUnitId: Optional Interstitial Ad Unit ID
     ///   - nativeAdUnitId: Optional Native Ad Unit ID
@@ -25,12 +26,13 @@ public final class AdsManager: NSObject {
     ///   - nativeAdErrorCount: Max native ad error count (default 7)
     public static func configureAds(
         isProduction: Bool,
-        appOpenAdEnabled: Bool,
+        openAdEnabled: Bool,
+        openAdOnLaunchEnabled: Bool,
         bannerAdEnabled: Bool,
         interstitialAdEnabled: Bool,
         nativeAdEnabled: Bool,
         nativeAdPreloadEnabled: Bool,
-        appOpenAdUnitId: String? = nil,
+        openAdUnitId: String? = nil,
         bannerAdUnitId: String? = nil,
         interstitialAdUnitId: String? = nil,
         nativeAdUnitId: String? = nil,
@@ -42,13 +44,14 @@ public final class AdsManager: NSObject {
     ) {
         // Configure AdsConfig with provided or default values
         AdsConfig.isProduction = isProduction
-        AdsConfig.appOpenAdEnabled = appOpenAdEnabled
+        AdsConfig.openAdEnabled = openAdEnabled
+        AdsConfig.openAdOnLaunchEnabled = openAdOnLaunchEnabled
         AdsConfig.bannerAdEnabled = bannerAdEnabled
         AdsConfig.interstitialAdEnabled = interstitialAdEnabled
         AdsConfig.nativeAdEnabled = nativeAdEnabled
         AdsConfig.nativeAdPreloadEnabled = nativeAdPreloadEnabled
         
-        AdsConfig.appOpenAdUnitId = appOpenAdUnitId ?? "ca-app-pub-3940256099942544/3419835294"
+        AdsConfig.openAdUnitId = openAdUnitId ?? "ca-app-pub-3940256099942544/3419835294"
         AdsConfig.bannerAdUnitId = bannerAdUnitId ?? "ca-app-pub-3940256099942544/2934735716"
         AdsConfig.interstitialAdUnitId = interstitialAdUnitId ?? "ca-app-pub-3940256099942544/4411468910"
         AdsConfig.nativeAdUnitId = nativeAdUnitId ?? "ca-app-pub-3940256099942544/3986624511"

@@ -43,12 +43,12 @@ public final class AppOpenAdManager: NSObject {
                 return
             }
             
-            if !AdsConfig.appOpenAdEnabled {
+            if !AdsConfig.openAdEnabled {
                 completion()
                 return
             }
             
-            if !AdsConfig.appOpenAdOnLaunchEnabled {
+            if !AdsConfig.openAdOnLaunchEnabled {
                 completion()
                 return
             }
@@ -61,7 +61,7 @@ public final class AppOpenAdManager: NSObject {
                 isLoadingAd = true
                 let request = Request()
                 AppOpenAd.load(
-                    with: AdsConfig.appOpenAdUnitId,
+                    with: AdsConfig.openAdUnitId,
                     request: request
                 ) { [weak self] ad, error in
                     Task { @MainActor in
@@ -101,9 +101,9 @@ public final class AppOpenAdManager: NSObject {
             if isLoadingAd || isAdAvailable() {
                 return
             }
-            if AdsConfig.appOpenAdEnabled {
+            if AdsConfig.openAdEnabled {
                 isLoadingAd = true
-                AppOpenAd.load(with: AdsConfig.appOpenAdUnitId, request: Request()) { [weak self] ad, error in
+                AppOpenAd.load(with: AdsConfig.openAdUnitId, request: Request()) { [weak self] ad, error in
                     Task { @MainActor in
                         guard let self else { return }
                         if let error = error {

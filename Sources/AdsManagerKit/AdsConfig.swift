@@ -10,7 +10,7 @@ public struct AdsConfig {
         set { UserDefaults.standard.set(newValue, forKey: #function) }
     }
 
-    static var appOpenAdEnabled: Bool {
+    static var openAdEnabled: Bool {
         get { UserDefaults.standard.bool(forKey: #function) }
         set { UserDefaults.standard.set(newValue, forKey: #function) }
     }
@@ -35,14 +35,14 @@ public struct AdsConfig {
         set { UserDefaults.standard.set(newValue, forKey: #function) }
     }
 
-    static var appOpenAdOnLaunchEnabled: Bool {
+    static var openAdOnLaunchEnabled: Bool {
         get { UserDefaults.standard.bool(forKey: #function) }
         set { UserDefaults.standard.set(newValue, forKey: #function) }
     }
     
     // MARK: - Ad Unit Identifiers
     // Stores the AdMob unit IDs for each ad format
-    static var appOpenAdUnitId: String {
+    static var openAdUnitId: String {
         get { isProduction ? UserDefaults.standard.string(forKey: #function) ?? "" : "ca-app-pub-3940256099942544/5575463023" }
         set { UserDefaults.standard.set(newValue, forKey: #function) }
     }
