@@ -38,8 +38,7 @@ public final class AdsManager: NSObject {
         maxInterstitialAdsPerSession: Int = 50,
         bannerAdErrorCount: Int = 7,
         interstitialAdErrorCount: Int = 7,
-        nativeAdErrorCount: Int = 7,
-        completion: @Sendable @escaping () -> Void
+        nativeAdErrorCount: Int = 7
     ) {
         // Configure AdsConfig with provided or default values
         AdsConfig.isProduction = isProduction
@@ -60,9 +59,6 @@ public final class AdsManager: NSObject {
         AdsConfig.bannerAdErrorCount = bannerAdErrorCount
         AdsConfig.interstitialAdErrorCount = interstitialAdErrorCount
         AdsConfig.nativeAdErrorCount = nativeAdErrorCount
-        
-        // Request ATT and UMP consent, then start MobileAds
-        AdsManager.configure(completion)
     }
     
     public static func configure(_ completion: @Sendable @escaping () -> Void) {

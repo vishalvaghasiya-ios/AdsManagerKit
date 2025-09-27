@@ -65,7 +65,10 @@ public final class AppOpenAdManager: NSObject {
                     request: request
                 ) { [weak self] ad, error in
                     Task { @MainActor in
-                        guard let self else { return }
+                        guard let self else {
+                            completion()
+                            return
+                        }
                         if let error = error {
                             self.isLoadingAd = false
                             self.appOpenAd = nil
