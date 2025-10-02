@@ -184,8 +184,9 @@ public final class AdsManager: NSObject {
     // MARK: - Banner Ad
     public func loadBanner(in containerView: UIView,
                            rootViewController: UIViewController,
-                           completion: ((Bool) -> Void)? = nil) {
-        BannerAdManager.shared.loadBannerAd(in: containerView, vc: rootViewController, completion: completion ?? { _ in })
+                           type: BannerAdType,
+                           completion: ((Bool, CGFloat) -> Void)? = nil) {
+        BannerAdManager.shared.loadBannerAd(in: containerView, vc: rootViewController, type: type, completion: completion ?? { _, _ in })
     }
     
     // MARK: - Native Ad
