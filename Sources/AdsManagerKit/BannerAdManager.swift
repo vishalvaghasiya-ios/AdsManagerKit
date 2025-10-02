@@ -42,13 +42,19 @@ final class BannerAdManager: NSObject {
                 return
             }
             
-            var adSize = AdSize(size: CGSize(width: 320, height: 50), flags: 0)
+            let viewWidth = containerView.bounds.width > 0 ? containerView.bounds.width : UIScreen.main.bounds.width
             if type == .ADAPTIVE {
-                let viewWidth = containerView.bounds.width
                 let adaptiveSize = currentOrientationAnchoredAdaptiveBanner(width: viewWidth)
-                adSize = AdSize(size: adaptiveSize.size, flags: 0)
+                let banner = BannerView(adSize: adaptiveSize)
+                bannerHeight = adaptiveSize.size.height
+                bannerView = banner
+            } else {
+                let regularSize = AdSize(size: CGSize(width: 320, height: 50), flags: 0)
+                let banner = BannerView(adSize: regularSize)
+                bannerHeight = regularSize.size.height
+                bannerView = banner
             }
-            let banner = BannerView(adSize: adSize)
+            let banner = bannerView!
             banner.adUnitID = AdsConfig.bannerAdUnitId
             banner.rootViewController = vc
             banner.delegate = self
@@ -63,8 +69,6 @@ final class BannerAdManager: NSObject {
             ])
             
             banner.load(Request())
-            bannerHeight = adSize.size.height
-            bannerView = banner
             self.completionHandler = completion
         } else {
             completion(false, bannerHeight)
