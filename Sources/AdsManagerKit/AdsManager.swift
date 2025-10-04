@@ -65,22 +65,27 @@ public final class AdsManager: NSObject {
     }
     
     public static func configure(_ completion: @Sendable @escaping () -> Void) {
+        
         // Request ATT first, then UMP consent
-        AdsManager.shared.requestATTAuthorization { _ in
+        AdsManager.shared.requestATTAuthorization { authorized in
             Task { @MainActor in
-                AdsManager.shared.requestUMPConsent { _ in
-                    MobileAds.shared.start()
-                    Task { @MainActor in
-                        if ConsentInformation.shared.canRequestAds {
-                            // Load initial ads if allowed
-                            AdsManager.shared.loadInterstitial()
-                            AdsManager.shared.preloadNativeAds()
-                        }
-                        completion()
+                if authorized {
+                    AdsManager.shared.requestUMPConsent { _ in
+                        Self.startAdsFlow(completion: completion)
                     }
+                } else {
+                    ConsentInformation.shared.reset()
+                    Self.startAdsFlow(completion: completion)
                 }
             }
         }
+    }
+    
+    private static func startAdsFlow(completion: @Sendable @escaping () -> Void) {
+        MobileAds.shared.start()
+        AdsManager.shared.loadInterstitial()
+        AdsManager.shared.preloadNativeAds()
+        completion()
     }
     
     public static let shared = AdsManager()
@@ -115,7 +120,7 @@ public final class AdsManager: NSObject {
         return ConsentInformation.shared.canRequestAds
     }
     
-    public func requestUMPConsent(completion: @Sendable @escaping (Bool) -> Void) {
+    public func requestUMPConsent(completion: @Sendable @escaping @MainActor (Bool) -> Void) {
         let parameters = RequestParameters()
         #if DEBUG
         let debugSettings = DebugSettings()
@@ -123,30 +128,37 @@ public final class AdsManager: NSObject {
         parameters.debugSettings = debugSettings
         #endif
         ConsentInformation.shared.requestConsentInfoUpdate(with: parameters) { error in
+            #if DEBUG
             if let error = error {
-                print("UMP Consent request failed: \(error.localizedDescription)")
+                print("UMP ConsentInfoUpdate error: \(error.localizedDescription)")
+            }
+            #endif
+            if let _ = error {
                 completion(false)
                 return
             }
             
             ConsentForm.load { form, loadError in
+                #if DEBUG
                 if let loadError = loadError {
-                    print("UMP Consent form load failed: \(loadError.localizedDescription)")
+                    print("UMP ConsentForm load error: \(loadError.localizedDescription)")
+                }
+                #endif
+                if let _ = loadError {
                     completion(false)
                     return
                 }
                 
                 if ConsentInformation.shared.formStatus == .available, let form = form {
-                    let rootVC = UIApplication.shared.connectedScenes
-                        .compactMap { $0 as? UIWindowScene }
-                        .flatMap { $0.windows }
-                        .first { $0.isKeyWindow }?.rootViewController ?? UIViewController()
-                    form.present(from: rootVC) { dismissError in
-                        if let dismissError = dismissError {
-                            print("UMP Consent form dismissed with error: \(dismissError.localizedDescription)")
-                            completion(false)
-                            return
+                    if let topVC = self.topMostViewController() {
+                        form.present(from: topVC) { dismissError in
+                            if let _ = dismissError {
+                                completion(false)
+                                return
+                            }
+                            completion(ConsentInformation.shared.canRequestAds)
                         }
+                    } else {
                         completion(ConsentInformation.shared.canRequestAds)
                     }
                 } else {
@@ -154,6 +166,15 @@ public final class AdsManager: NSObject {
                 }
             }
         }
+    }
+    
+    private func topMostViewController() -> UIViewController? {
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else { return nil }
+        var topController = windowScene.windows.first(where: { $0.isKeyWindow })?.rootViewController
+        while let presented = topController?.presentedViewController {
+            topController = presented
+        }
+        return topController
     }
     
     public func resetErrorCounters() {

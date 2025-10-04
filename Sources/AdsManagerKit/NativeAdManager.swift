@@ -33,6 +33,10 @@ final class NativeAdManager: NSObject {
         return AdsConfig.currentNativeAdErrorCount >= AdsConfig.nativeAdErrorCount
     }
     
+    private func createAdRequest() -> Request {
+        return Request() // Latest UMP SDK automatically handles ATT/GDPR
+    }
+    
     // MARK: - Preload Native Ads
     func preloadNativeAds(count: Int = 1) {
         if AdsConfig.nativeAdPreloadEnabled {
@@ -104,30 +108,28 @@ final class NativeAdManager: NSObject {
     
     // MARK: - Internal Ad Loader
     private func loadAd(completion: ((NativeAd?) -> Void)? = nil) {
-        if AdsManager.shared.canRequestAds {
-            if !AdsConfig.nativeAdEnabled {
-                self.completionHandler?(false)
-                return
-            }
-            guard !hasExceededErrorLimit() else {
-                print("[NativeAd] ⚠️ Max error attempts reached — not loading.")
-                self.completionHandler?(false)
-                return
-            }
-            
-            let adLoader = AdLoader(adUnitID: AdsConfig.nativeAdUnitId,
-                                    rootViewController: nil,
-                                    adTypes: [.native],
-                                    options: nil)
-            if let completion = completion {
-                completionHandlers[adLoader] = completion
-            }
-            adLoader.delegate = self
-            activeAdLoaders.append(adLoader)
-            adLoader.load(Request())
-        } else {
+        if !AdsConfig.nativeAdEnabled {
             self.completionHandler?(false)
+            return
         }
+        guard !hasExceededErrorLimit() else {
+            #if DEBUG
+            print("[NativeAd] ⚠️ Max error attempts reached — not loading.")
+            #endif
+            self.completionHandler?(false)
+            return
+        }
+        
+        let adLoader = AdLoader(adUnitID: AdsConfig.nativeAdUnitId,
+                                rootViewController: nil,
+                                adTypes: [.native],
+                                options: nil)
+        if let completion = completion {
+            completionHandlers[adLoader] = completion
+        }
+        adLoader.delegate = self
+        activeAdLoaders.append(adLoader)
+        adLoader.load(createAdRequest())
     }
     
 }
@@ -193,7 +195,9 @@ extension NativeAdManager: NativeAdLoaderDelegate {
 private extension NativeAdManager {
     func handleAdLoaded(loaderID: ObjectIdentifier, nativeAd: NativeAd) {
         activeAdLoaders.removeAll { ObjectIdentifier($0) == loaderID }
+        #if DEBUG
         print("[NativeAd] loaded.")
+        #endif
         self.resetErrorCounter()
         if let (loader, completion) = completionHandlers.first(where: { ObjectIdentifier($0.key) == loaderID }) {
             completion(nativeAd)
@@ -203,14 +207,18 @@ private extension NativeAdManager {
             if adCache.count < maxCacheCapacity {
                 adCache.append(nativeAd)
                 self.completionHandler?(true)
+                #if DEBUG
                 print("Cached Ads Count: \(NativeAdManager.shared.adCache.count)")
+                #endif
             }
         }
     }
 
     func handleAdFailed(loaderID: ObjectIdentifier, error: Error) {
         activeAdLoaders.removeAll { ObjectIdentifier($0) == loaderID }
+        #if DEBUG
         print("[NativeAd] Debug Info: AdUnitID: \(AdsConfig.nativeAdUnitId), Error: \(error)")
+        #endif
         self.incrementErrorCounter()
         self.completionHandler?(false)
         if let (loader, completion) = completionHandlers.first(where: { ObjectIdentifier($0.key) == loaderID }) {

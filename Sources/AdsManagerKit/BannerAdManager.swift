@@ -29,62 +29,68 @@ final class BannerAdManager: NSObject {
                       vc: UIViewController,
                       type: BannerAdType,
                       completion: @escaping (Bool, CGFloat) -> Void) {
-        if AdsManager.shared.canRequestAds {
-            if !AdsConfig.bannerAdEnabled {
-                completion(false, bannerHeight)
-                return
-            }
-            
-            // ❌ If ad not loaded, try loading
-            guard !hasExceededErrorLimit() else {
-                print("[BannerAd] ⚠️ Max retries exceeded — not loading or showing.")
-                completion(false, bannerHeight)
-                return
-            }
-            
-            let viewWidth = containerView.bounds.width > 0 ? containerView.bounds.width : UIScreen.main.bounds.width
-            if type == .ADAPTIVE {
-                let adaptiveSize = currentOrientationAnchoredAdaptiveBanner(width: viewWidth)
-                let banner = BannerView(adSize: adaptiveSize)
-                bannerHeight = adaptiveSize.size.height
-                bannerView = banner
-            } else {
-                let regularSize = AdSize(size: CGSize(width: 320, height: 50), flags: 0)
-                let banner = BannerView(adSize: regularSize)
-                bannerHeight = regularSize.size.height
-                bannerView = banner
-            }
-            let banner = bannerView!
-            banner.adUnitID = AdsConfig.bannerAdUnitId
-            banner.rootViewController = vc
-            banner.delegate = self
-            banner.translatesAutoresizingMaskIntoConstraints = false
-            
-            containerView.addSubview(banner)
-            containerView.clipsToBounds = true
-            
-            NSLayoutConstraint.activate([
-                banner.bottomAnchor.constraint(equalTo: containerView.safeAreaLayoutGuide.bottomAnchor),
-                banner.centerXAnchor.constraint(equalTo: containerView.centerXAnchor)
-            ])
-            
-            banner.load(Request())
-            self.completionHandler = completion
-        } else {
-            completion(false, bannerHeight)
+        if !AdsConfig.bannerAdEnabled {
+            completion(false, 0)
+            return
         }
+
+        guard !hasExceededErrorLimit() else {
+            #if DEBUG
+            print("[BannerAd] ⚠️ Max retries exceeded — not loading or showing.")
+            #endif
+            completion(false, 0)
+            return
+        }
+
+        let viewWidth = containerView.bounds.width > 0 ? containerView.bounds.width : UIScreen.main.bounds.width
+        var adSize: AdSize
+        if type == .ADAPTIVE {
+            adSize = currentOrientationAnchoredAdaptiveBanner(width: viewWidth)
+            bannerHeight = adSize.size.height
+        } else {
+            adSize = AdSize(size: CGSize(width: 320, height: 50), flags: 0)
+            bannerHeight = adSize.size.height
+        }
+
+        let banner = BannerView(adSize: adSize)
+        bannerView = banner
+        banner.adUnitID = AdsConfig.bannerAdUnitId
+        banner.rootViewController = vc
+        banner.delegate = self
+        banner.translatesAutoresizingMaskIntoConstraints = false
+
+        containerView.addSubview(banner)
+        containerView.clipsToBounds = true
+
+        NSLayoutConstraint.activate([
+            banner.bottomAnchor.constraint(equalTo: containerView.safeAreaLayoutGuide.bottomAnchor),
+            banner.centerXAnchor.constraint(equalTo: containerView.centerXAnchor)
+        ])
+
+        // Use consent-aware request
+        let request = createAdRequest()
+        banner.load(request)
+        self.completionHandler = completion
+    }
+
+    private func createAdRequest() -> Request {
+        return Request() // Latest UMP SDK automatically handles ATT/GDPR
     }
 }
 
 extension BannerAdManager: BannerViewDelegate {
     public func bannerViewDidReceiveAd(_ bannerView: BannerView) {
+        #if DEBUG
         print("[BannerAd] loaded.")
+        #endif
         self.resetErrorCounter()
         completionHandler?(true, bannerHeight)
     }
-
+    
     public func bannerView(_ bannerView: BannerView, didFailToReceiveAdWithError error: Error) {
+        #if DEBUG
         print("[BannerAd] Failed to load: \(error.localizedDescription)")
+        #endif
         self.incrementErrorCounter()
         completionHandler?(false, bannerHeight)
     }

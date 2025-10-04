@@ -1,4 +1,6 @@
 @preconcurrency import GoogleMobileAds
+import AppTrackingTransparency
+import UserMessagingPlatform
 import UIKit
 
 @MainActor
@@ -10,6 +12,10 @@ public final class InterstitialAdManager: NSObject, FullScreenContentDelegate {
     private var completionHandler: (() -> Void)?
     var displayCounter: Int = 0
     var displayLimitCounter: Int = 0
+    
+    private func createAdRequest() -> Request {
+        return Request() // Latest UMP SDK automatically handles ATT/GDPR
+    }
     
     public func resetErrorCounter() {
         AdsConfig.currentInterstitialAdErrorCount = 0
@@ -23,79 +29,83 @@ public final class InterstitialAdManager: NSObject, FullScreenContentDelegate {
         return AdsConfig.currentInterstitialAdErrorCount >= AdsConfig.interstitialAdErrorCount
     }
     
-    public func loadAndShow(completion: @escaping () -> Void) {
-        if AdsManager.shared.canRequestAds {
-            self.completionHandler = completion
-            
-            if let ad = interstitialAd {
-                print("[InterstitialAd] already loaded — presenting directly.")
-                ad.present(from: nil)
-                return
-            }
-            
-            guard !hasExceededErrorLimit() else {
-                print("[InterstitialAd] ⚠️ Max retries exceeded — not loading or showing.")
-                completion()
-                return
-            }
-            
-            let request = Request()
-            InterstitialAd.load(
-                with: AdsConfig.interstitialAdUnitId,
-                request: request
-            ) { [weak self] ad, error in
-                Task { @MainActor [weak self] in
-                    guard let self = self else { return }
-                    
-                    if let error = error {
-                        print("[InterstitialAd] Failed to load: \(error.localizedDescription)")
-                        self.incrementErrorCounter()
-                        self.completionHandler?()
-                        return
-                    }
-                    
-                    self.resetErrorCounter()
-                    
-                    self.interstitialAd = ad
-                    self.interstitialAd?.fullScreenContentDelegate = self
-                    ad?.present(from: nil)
-                }
-            }
-        } else {
+    public func loadAndShow(from viewController: UIViewController, completion: @escaping () -> Void) {
+        self.completionHandler = completion
+        
+        if let ad = interstitialAd {
+            #if DEBUG
+            print("[InterstitialAd] already loaded — presenting directly.")
+            #endif
+            ad.present(from: viewController)
+            return
+        }
+        
+        guard !hasExceededErrorLimit() else {
+            #if DEBUG
+            print("[InterstitialAd] ⚠️ Max retries exceeded — not loading or showing.")
+            #endif
             completion()
+            return
+        }
+        
+        InterstitialAd.load(
+            with: AdsConfig.interstitialAdUnitId,
+            request: createAdRequest()
+        ) { [weak self] ad, error in
+            Task { @MainActor [weak self] in
+                guard let self = self else { return }
+                
+                if let error = error {
+                    #if DEBUG
+                    print("[InterstitialAd] Failed to load: \(error.localizedDescription)")
+                    #endif
+                    self.incrementErrorCounter()
+                    self.completionHandler?()
+                    return
+                }
+                
+                self.resetErrorCounter()
+                
+                self.interstitialAd = ad
+                self.interstitialAd?.fullScreenContentDelegate = self
+                ad?.present(from: viewController)
+            }
         }
     }
     
     /// Load the interstitial ad
     func loadAd() {
-        if AdsManager.shared.canRequestAds {
-            guard !hasExceededErrorLimit() else {
-                print("[InterstitialAd] ⚠️ Max error attempts reached — not loading.")
-                return
-            }
-            
-            if !AdsConfig.interstitialAdEnabled {
-                return
-            }
-            
-            guard interstitialAd == nil else { return }
-            
-            let request = Request()
-            InterstitialAd.load(with: AdsConfig.interstitialAdUnitId, request: request) { [weak self] ad, error in
-                Task { @MainActor [weak self] in
-                    guard let self = self else { return }
-                    
-                    if let error = error {
-                        print("[InterstitialAd] Failed to load: \(error.localizedDescription)")
-                        self.incrementErrorCounter()
-                        return
-                    }
-                    
-                    self.resetErrorCounter()
-                    self.interstitialAd = ad
-                    self.interstitialAd?.fullScreenContentDelegate = self
-                    print("[InterstitialAd] loaded and ready.")
+        guard !hasExceededErrorLimit() else {
+            #if DEBUG
+            print("[InterstitialAd] ⚠️ Max error attempts reached — not loading.")
+            #endif
+            return
+        }
+        
+        if !AdsConfig.interstitialAdEnabled {
+            return
+        }
+        
+        guard interstitialAd == nil else { return }
+        
+        InterstitialAd.load(with: AdsConfig.interstitialAdUnitId, request: createAdRequest()) { [weak self] ad, error in
+            Task { @MainActor [weak self] in
+                guard let self = self else { return }
+                
+                if let error = error {
+                    #if DEBUG
+                    print("[InterstitialAd] Failed to load: \(error.localizedDescription)")
+                    #endif
+                    self.incrementErrorCounter()
+                    return
                 }
+                
+                self.resetErrorCounter()
+                self.interstitialAd = ad
+                self.interstitialAd?.fullScreenContentDelegate = self
+                #if DEBUG
+                print("[InterstitialAd] loaded and ready.")
+                #endif
             }
         }
     }
@@ -125,20 +135,26 @@ public final class InterstitialAdManager: NSObject, FullScreenContentDelegate {
     // MARK: - GADFullScreenContentDelegate
     
     public func adDidDismissFullScreenContent(_ ad: FullScreenPresentingAd) {
+        #if DEBUG
         print("[InterstitialAd] Dismissed")
+        #endif
         interstitialAd = nil
         loadAd()
         completionHandler?()
     }
     
     public func ad(_ ad: FullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
+        #if DEBUG
         print("[InterstitialAd] Failed to present: \(error.localizedDescription)")
+        #endif
         interstitialAd = nil
         loadAd()
         completionHandler?()
     }
     
     public func adWillPresentFullScreenContent(_ ad: FullScreenPresentingAd) {
+        #if DEBUG
         print("[InterstitialAd] Will present")
+        #endif
     }
 }
