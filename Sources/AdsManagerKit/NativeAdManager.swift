@@ -1,7 +1,7 @@
 import GoogleMobileAds
 import UIKit
 public enum AdType: String {
-    case SMALL = "NativeAdView_Small"
+    case SMALL = "NativeAdView_Small"//120
     case MEDIUM = "NativeAdView_Medium"
     case LARGE = "NativeAdView"
 }
@@ -85,10 +85,34 @@ final class NativeAdManager: NSObject {
         adView.nativeAd = nativeAd
         
         // Bind assets
-        (adView.headlineView as? UILabel)?.text = nativeAd.headline
-        (adView.iconView as? UIImageView)?.image = nativeAd.icon?.image
-        (adView.bodyView as? UILabel)?.text = nativeAd.body
-        (adView.callToActionView as? UIButton)?.setTitle(nativeAd.callToAction, for: .normal)
+        if adType == .SMALL {
+            (adView.iconView as? UIImageView)?.image = nativeAd.icon?.image
+            (adView.headlineView as? UILabel)?.text = nativeAd.headline
+            (adView.storeView as? UILabel)?.text = nativeAd.store
+            (adView.callToActionView as? UIButton)?.setTitle(nativeAd.callToAction, for: .normal)
+            if let starRating = nativeAd.starRating {
+                (adView.starRatingView as? UIImageView)?.image = getStarRatingImage(for: starRating)
+                adView.starRatingView?.isHidden = false
+            } else {
+                adView.starRatingView?.isHidden = true // Hide if no rating
+            }
+        }
+        
+        if adType == .MEDIUM {
+            (adView.iconView as? UIImageView)?.image = nativeAd.icon?.image
+            (adView.headlineView as? UILabel)?.text = nativeAd.headline
+            (adView.advertiserView as? UILabel)?.text = nativeAd.advertiser
+            (adView.storeView as? UILabel)?.text = nativeAd.store
+            (adView.bodyView as? UILabel)?.text = nativeAd.body
+            (adView.callToActionView as? UIButton)?.setTitle(nativeAd.callToAction, for: .normal)
+            if let starRating = nativeAd.starRating {
+                (adView.starRatingView as? UIImageView)?.image = getStarRatingImage(for: starRating)
+                adView.starRatingView?.isHidden = false
+            } else {
+                adView.starRatingView?.isHidden = true // Hide if no rating
+            }
+        }
+        
         if adType == .LARGE {
             adView.mediaView?.mediaContent = nativeAd.mediaContent
             // Optional extra assets
