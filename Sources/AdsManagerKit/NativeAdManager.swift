@@ -70,6 +70,15 @@ final class NativeAdManager: NSObject {
         }
     }
     
+    /// Displays a Google Mobile Ads native ad inside the specified container view.
+    /// - Parameters:
+    ///   - containerView: The UIView where the native ad will be rendered.
+    ///   - nativeAd: The loaded `NativeAd` instance to be displayed.
+    ///   - adType: The `AdType` defining which ad layout (Small, Medium, or Large) XIB to load.
+    ///
+    /// Loads the appropriate XIB for the given `adType`, binds ad assets (headline, icon, CTA, etc.)
+    /// to the UI elements, and adds it to the container view. Also ensures interaction behavior and
+    /// star rating display are configured correctly.
     private func displayNativeAd(in containerView: UIView, _ nativeAd: NativeAd, adType: AdType) {
         // Load the custom XIB
         guard let adView = Bundle.module.loadNibNamed(adType.rawValue, owner: nil, options: nil)?.first as? NativeAdView else {
@@ -99,11 +108,13 @@ final class NativeAdManager: NSObject {
         }
         
         if adType == .MEDIUM {
+            adView.mediaView?.mediaContent = nativeAd.mediaContent
             (adView.iconView as? UIImageView)?.image = nativeAd.icon?.image
             (adView.headlineView as? UILabel)?.text = nativeAd.headline
             (adView.advertiserView as? UILabel)?.text = nativeAd.advertiser
             (adView.storeView as? UILabel)?.text = nativeAd.store
             (adView.bodyView as? UILabel)?.text = nativeAd.body
+            (adView.priceView as? UILabel)?.text = nativeAd.price
             (adView.callToActionView as? UIButton)?.setTitle(nativeAd.callToAction, for: .normal)
             if let starRating = nativeAd.starRating {
                 (adView.starRatingView as? UIImageView)?.image = getStarRatingImage(for: starRating)
@@ -115,10 +126,14 @@ final class NativeAdManager: NSObject {
         
         if adType == .LARGE {
             adView.mediaView?.mediaContent = nativeAd.mediaContent
+            (adView.iconView as? UIImageView)?.image = nativeAd.icon?.image
+            (adView.headlineView as? UILabel)?.text = nativeAd.headline
+            (adView.bodyView as? UILabel)?.text = nativeAd.body
             // Optional extra assets
             (adView.advertiserView as? UILabel)?.text = nativeAd.advertiser
             (adView.priceView as? UILabel)?.text = nativeAd.price
             (adView.storeView as? UILabel)?.text = nativeAd.store
+            (adView.callToActionView as? UIButton)?.setTitle(nativeAd.callToAction, for: .normal)
             // Set the star rating
             if let starRating = nativeAd.starRating {
                 (adView.starRatingView as? UIImageView)?.image = getStarRatingImage(for: starRating)
@@ -184,12 +199,16 @@ func getStarRatingImage(for rating: NSDecimalNumber) -> UIImage? {
 }
 
 func combineStarImages(_ images: [UIImage]) -> UIImage? {
-    // Create a UIGraphics context to combine images
-    let combinedWidth = images.count * 20 // Assuming each star is 20 points wide
-    UIGraphicsBeginImageContext(CGSize(width: combinedWidth, height: 20))
+    // Calculate combined width based on the number of stars
+    let starWidth: CGFloat = 20
+    let starHeight: CGFloat = 20
+    let combinedWidth = CGFloat(images.count) * starWidth
+    
+    // Use scale = 0.0 to match device pixel density (avoids blurriness)
+    UIGraphicsBeginImageContextWithOptions(CGSize(width: combinedWidth, height: starHeight), false, 0.0)
     
     for (index, image) in images.enumerated() {
-        image.draw(in: CGRect(x: index * 20, y: 0, width: 20, height: 20))
+        image.draw(in: CGRect(x: CGFloat(index) * starWidth, y: 0, width: starWidth, height: starHeight))
     }
     
     let combinedImage = UIGraphicsGetImageFromCurrentImageContext()
