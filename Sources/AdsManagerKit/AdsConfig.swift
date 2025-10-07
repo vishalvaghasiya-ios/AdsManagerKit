@@ -10,33 +10,46 @@ public struct AdsConfig {
         set { UserDefaults.standard.set(newValue, forKey: #function) }
     }
 
-    static var openAdEnabled: Bool {
+    /// Indicates whether the user has premium access (ads should be disabled).
+    static var isPremiumUser: Bool {
         get { UserDefaults.standard.bool(forKey: #function) }
+        set { UserDefaults.standard.set(newValue, forKey: #function) }
+    }
+
+    // MARK: - Private Helper
+    /// Centralized logic to disable ads for premium users, otherwise fetch the stored value.
+    private static func adEnabled(_ key: String) -> Bool {
+        if isPremiumUser { return false }
+        return UserDefaults.standard.bool(forKey: key)
+    }
+
+    static var openAdEnabled: Bool {
+        get { adEnabled(#function) }
         set { UserDefaults.standard.set(newValue, forKey: #function) }
     }
 
     static var bannerAdEnabled: Bool {
-        get { UserDefaults.standard.bool(forKey: #function) }
+        get { adEnabled(#function) }
         set { UserDefaults.standard.set(newValue, forKey: #function) }
     }
 
     static var interstitialAdEnabled: Bool {
-        get { UserDefaults.standard.bool(forKey: #function) }
+        get { adEnabled(#function) }
         set { UserDefaults.standard.set(newValue, forKey: #function) }
     }
 
     static var nativeAdEnabled: Bool {
-        get { UserDefaults.standard.bool(forKey: #function) }
+        get { adEnabled(#function) }
         set { UserDefaults.standard.set(newValue, forKey: #function) }
     }
 
     static var nativeAdPreloadEnabled: Bool {
-        get { UserDefaults.standard.bool(forKey: #function) }
+        get { adEnabled(#function) }
         set { UserDefaults.standard.set(newValue, forKey: #function) }
     }
 
     static var openAdOnLaunchEnabled: Bool {
-        get { UserDefaults.standard.bool(forKey: #function) }
+        get { adEnabled(#function) }
         set { UserDefaults.standard.set(newValue, forKey: #function) }
     }
     

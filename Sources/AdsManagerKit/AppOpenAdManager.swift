@@ -99,6 +99,10 @@ public final class AppOpenAdManager: NSObject {
     }
     
     func loadOpenAd() {
+        if !AdsConfig.openAdOnLaunchEnabled {
+            return
+        }
+        
         if isLoadingAd || isAdAvailable() {
             return
         }
@@ -129,6 +133,10 @@ public final class AppOpenAdManager: NSObject {
     }
     
     func tryToPresentAd() {
+        if !AdsConfig.openAdOnLaunchEnabled {
+            return
+        }
+        
         // If the app open ad is already showing, do not show the ad again.
         if isShowingAd {
             #if DEBUG

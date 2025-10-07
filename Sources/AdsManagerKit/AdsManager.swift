@@ -88,6 +88,11 @@ public final class AdsManager: NSObject {
         completion()
     }
     
+    public static func setToPremium(_ isPremium: Bool) {
+        // Save premium state
+        AdsConfig.isPremiumUser = isPremium
+    }
+    
     public static let shared = AdsManager()
     
     // Call this before setupAds
