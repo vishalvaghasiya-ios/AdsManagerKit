@@ -155,9 +155,6 @@ AdsManager.shared.presentAppOpenAdIfAvailable()
 
 Use the `isProductionApp` flag to switch between test and production ad units. When `isProductionApp` is set to `false`, AdsManager will use test ad units to help avoid invalid traffic during development and testing. Make sure to set this flag appropriately before configuring your ads.
 
-## 📝 Version
-
-Current Version: ![GitHub Release](https://img.shields.io/github/v/release/vishalvaghasiya-ios/AdsManagerKit)
 
 ## ⚠️ Notes
 
