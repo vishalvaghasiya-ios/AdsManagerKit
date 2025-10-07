@@ -157,7 +157,7 @@ Use the `isProductionApp` flag to switch between test and production ad units. W
 
 ## 📝 Version
 
-Current Version: 1.0.0 (Initial Release)
+Current Version: ![GitHub Release](https://img.shields.io/github/v/release/vishalvaghasiya-ios/AdsManagerKit)
 
 ## ⚠️ Notes
 
