@@ -69,6 +69,30 @@ AdsManager.shared.configureAds(
 )
 ```
 
+```swift
+// First, configure Ads
+AdsManager.shared.configureAds(
+    appOpenId: "YOUR_APP_OPEN_AD_UNIT_ID",
+    bannerId: "YOUR_BANNER_AD_UNIT_ID",
+    interstitialId: "YOUR_INTERSTITIAL_AD_UNIT_ID",
+    nativeId: "YOUR_NATIVE_AD_UNIT_ID",
+    openAdEnabled: true,
+    bannerEnabled: true,
+    interstitialEnabled: true,
+    nativeEnabled: true,
+    nativePreloadEnabled: true
+)
+
+// Then in your SplashScreen or initial view controller
+AdsManager.configure {
+    DispatchQueue.main.async {
+        //Navigate or Other action
+    }
+}
+```
+
+*Note:* Using the completion handler of `AdsManager.configure` ensures that ads are loaded **after configuration is complete**, preventing timing issues during app startup.
+
 **Note:** If you enable premium mode, all ad-loading and displaying functions will automatically be skipped, effectively disabling ads throughout your app.
 
 ### Premium Mode (Optional)
