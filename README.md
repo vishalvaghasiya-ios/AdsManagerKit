@@ -56,7 +56,7 @@ Set up your ads by configuring ad unit IDs and enabling desired ad types using t
 
 ```swift
 // Configure Ads using the new method
-AdsManager.shared.configureAds(
+AdsManager.configureAds(
     appOpenId: "YOUR_APP_OPEN_AD_UNIT_ID",
     bannerId: "YOUR_BANNER_AD_UNIT_ID",
     interstitialId: "YOUR_INTERSTITIAL_AD_UNIT_ID",
@@ -71,7 +71,7 @@ AdsManager.shared.configureAds(
 
 ```swift
 // First, configure Ads
-AdsManager.shared.configureAds(
+AdsManager.configureAds(
     appOpenId: "YOUR_APP_OPEN_AD_UNIT_ID",
     bannerId: "YOUR_BANNER_AD_UNIT_ID",
     interstitialId: "YOUR_INTERSTITIAL_AD_UNIT_ID",
@@ -177,6 +177,17 @@ Add your **Google Mobile Ads Application ID** in your app's `Info.plist`:
 - Replace `ca-app-pub-XXXXXXXXXXXXXXXX~YYYYYYYYYY` with your actual AdMob App ID from the [AdMob Console](https://apps.admob.com/).
 - Make sure the App ID is **unique to your app** and correctly formatted.
 - This ID is required for all AdMob ads to function properly.
+
+### Disable Native Ad Validator (Optional)
+
+If you want to disable the Native Ad Validator in your app, add the following key to your `Info.plist`:
+
+```xml
+<key>GADNativeAdValidatorEnabled</key>
+<false/>
+```
+
+- This is optional and generally used to prevent validation logs in production.
 
 ## 👤 Author
 
