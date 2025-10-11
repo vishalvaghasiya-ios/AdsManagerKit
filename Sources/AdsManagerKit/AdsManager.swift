@@ -51,7 +51,7 @@ public final class AdsManager: NSObject {
         AdsConfig.nativeAdEnabled = nativeAdEnabled
         AdsConfig.nativeAdPreloadEnabled = nativeAdPreloadEnabled
         
-        AdsConfig.openAdUnitId = openAdUnitId ?? "ca-app-pub-3940256099942544/3419835294"
+        AdsConfig.openAdUnitId = openAdUnitId ?? "ca-app-pub-3940256099942544/5575463023"
         AdsConfig.bannerAdUnitId = bannerAdUnitId ?? "ca-app-pub-3940256099942544/2934735716"
         AdsConfig.interstitialAdUnitId = interstitialAdUnitId ?? "ca-app-pub-3940256099942544/4411468910"
         AdsConfig.nativeAdUnitId = nativeAdUnitId ?? "ca-app-pub-3940256099942544/3986624511"
