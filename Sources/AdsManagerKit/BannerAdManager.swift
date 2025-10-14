@@ -4,6 +4,7 @@ public enum BannerAdType: String {
     case ADAPTIVE
     case REGULAR
 }
+
 @MainActor
 final class BannerAdManager: NSObject {
     
@@ -79,6 +80,30 @@ final class BannerAdManager: NSObject {
     private func createAdRequest() -> Request {
         return Request() // Latest UMP SDK automatically handles ATT/GDPR
     }
+    
+    
+    /// SwiftUI-friendly banner container
+    public func makeBannerContainer(adType: BannerAdType = .REGULAR) -> UIView {
+        let containerView = UIView()
+        
+        guard let rootVC = UIApplication.shared.windows.first?.rootViewController else {
+            return containerView
+        }
+        
+        loadBannerAd(in: containerView, vc: rootVC, type: adType) { [weak containerView] success, height in
+            #if DEBUG
+            print("Banner loaded: \(success), height: \(height)")
+            #endif
+            
+            // Dynamically update container height if needed
+            DispatchQueue.main.async {
+                containerView?.frame.size.height = height
+            }
+        }
+        
+        return containerView
+    }
+    
 }
 
 extension BannerAdManager: BannerViewDelegate {
@@ -98,3 +123,18 @@ extension BannerAdManager: BannerViewDelegate {
         completionHandler?(false, bannerHeight)
     }
 }
+
+// MARK: - SwiftUI Banner Wrapper
+#if canImport(SwiftUI)
+import SwiftUI
+
+struct BannerAdView: UIViewRepresentable {
+    var adType: BannerAdType = .REGULAR
+
+    func makeUIView(context: Context) -> UIView {
+        return BannerAdManager.shared.makeBannerContainer(adType: adType)
+    }
+
+    func updateUIView(_ uiView: UIView, context: Context) { }
+}
+#endif

@@ -125,6 +125,152 @@ AdsManager.shared.requestUMPConsent { granted in
 
 ### Loading and Showing Ads
 
+## SwiftUI Integration – Banner Ads
+
+You can now use Banner Ads directly in SwiftUI by leveraging the `BannerAdView` wrapper.
+
+```swift
+import SwiftUI
+import AdsManager
+
+struct ContentView: View {
+    var body: some View {
+        VStack {
+            Text("Welcome to My App")
+                .font(.title)
+                .padding()
+            
+            Spacer()
+            
+            // SwiftUI Banner Ad
+            BannerAdView(adType: .ADAPTIVE)
+                .frame(height: 50) // Adaptive banners adjust height automatically
+            
+            Spacer()
+        }
+    }
+}
+```
+
+**Notes:**
+
+- Ensure `AdsManager.configure` is called **before showing ads**, typically in your App struct or initial view.  
+
+```swift
+@main
+struct MyApp: App {
+    init() {
+        AdsManager.configure {
+            print("Ads configured")
+        }
+    }
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+        }
+    }
+}
+```
+
+- `.ADAPTIVE` banners automatically adjust their height based on device width.  
+- You can replace `.ADAPTIVE` with your specific `BannerAdType` if needed.
+
+## SwiftUI Integration – Native, Interstitial, and App Open Ads
+
+You can use Native Ads, Interstitial Ads, and App Open Ads directly in SwiftUI with AdsManagerKit.
+
+### Native Ads
+
+Use the `NativeAdContainerView` wrapper:
+
+```swift
+import SwiftUI
+import AdsManager
+
+struct ContentView: View {
+    var body: some View {
+        VStack(spacing: 20) {
+            Text("Hello SwiftUI Native Ads")
+                .font(.title)
+
+            // Small native ad
+            NativeAdContainerView(adType: .SMALL)
+                .frame(height: 120)
+            
+            // Medium native ad
+            NativeAdContainerView(adType: .MEDIUM)
+                .frame(height: 300)
+            
+            // Large native ad
+            NativeAdContainerView(adType: .LARGE)
+                .frame(height: 400)
+        }
+        .padding()
+    }
+}
+```
+
+### Interstitial Ads
+
+Interstitial ads require a `UIViewController` to present. You can get it using:
+
+```swift
+extension View {
+    func rootViewController() -> UIViewController? {
+        guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = scene.windows.first else { return nil }
+        return window.rootViewController
+    }
+}
+```
+
+**Usage:**
+
+```swift
+Button("Show Interstitial Ad") {
+    if let vc = UIApplication.shared.windows.first?.rootViewController {
+        AdsManager.shared.showInterstitial(from: vc) {
+            print("Interstitial dismissed")
+        }
+    }
+}
+```
+
+Preload interstitial ads with:
+
+```swift
+AdsManager.shared.loadInterstitial()
+```
+
+### App Open Ads
+
+App Open Ads are shown when the app launches or returns from background:
+
+```swift
+@main
+struct MyApp: App {
+    init() {
+        AdsManager.configure {
+            print("Ads configured")
+        }
+    }
+
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+                .onAppear {
+                    AdsManager.shared.presentAppOpenAdIfAvailable()
+                }
+        }
+    }
+}
+```
+
+**Notes:**
+
+- Ensure `appOpenEnabled = true` in `configureAds`.
+- Only show interstitial ads when they are ready.
+
 **Banner Ads:**  
 ```swift
 AdsManager.shared.loadBanner(in: bannerContainer, rootViewController: self) { isShown, height in

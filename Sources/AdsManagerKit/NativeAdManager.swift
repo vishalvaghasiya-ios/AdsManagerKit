@@ -274,3 +274,30 @@ private extension NativeAdManager {
 // MARK: - Sendable Conformance for SDK Types
 extension NativeAd: @unchecked @retroactive Sendable {}
 extension AdLoader: @unchecked @retroactive Sendable {}
+
+// MARK: - Sendable Conformance for SDK Types
+#if canImport(SwiftUI)
+import SwiftUI
+
+/// SwiftUI wrapper for Native Ads
+struct NativeAdContainerView: UIViewRepresentable {
+    var adType: AdType = .MEDIUM
+
+    func makeUIView(context: Context) -> UIView {
+        let containerView = UIView()
+        containerView.backgroundColor = .clear
+
+        NativeAdManager.shared.getAd(in: containerView, adType: adType) { success in
+            #if DEBUG
+            print("Native Ad loaded in SwiftUI: \(success)")
+            #endif
+        }
+
+        return containerView
+    }
+
+    func updateUIView(_ uiView: UIView, context: Context) {
+        // No dynamic updates needed; ad content is managed internally
+    }
+}
+#endif
