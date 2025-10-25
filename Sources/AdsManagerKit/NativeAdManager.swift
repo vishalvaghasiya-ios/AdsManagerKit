@@ -281,10 +281,12 @@ import SwiftUI
 /// SwiftUI wrapper for Native Ads
 public struct NativeAdContainerView: UIViewRepresentable {
     public var adType: AdType = .SMALL
+    public var onAdLoaded: ((CGFloat) -> Void)? = nil  // <-- new closure
 
-    // ✅ Public initializer
-    public init(adType: AdType = .SMALL) {
+    public init(adType: AdType = .SMALL,
+                onAdLoaded: ((CGFloat) -> Void)? = nil) {
         self.adType = adType
+        self.onAdLoaded = onAdLoaded
     }
 
     public func makeUIView(context: Context) -> UIView {
@@ -295,12 +297,21 @@ public struct NativeAdContainerView: UIViewRepresentable {
             #if DEBUG
             print("Native Ad loaded in SwiftUI: \(success)")
             #endif
+            if success {
+                // Set height according to adType
+                let height: CGFloat
+                switch adType {
+                case .SMALL: height = 120
+                case .MEDIUM: height = 300
+                case .LARGE: height = 400
+                }
+                self.onAdLoaded?(height)
+            } else {
+                self.onAdLoaded?(0) // default 0 if ad failed
+            }
         }
-
         return containerView
     }
 
-    public func updateUIView(_ uiView: UIView, context: Context) {
-        // No dynamic updates needed; ad content is managed internally
-    }
+    public func updateUIView(_ uiView: UIView, context: Context) { }
 }

@@ -127,7 +127,7 @@ AdsManager.shared.requestUMPConsent { granted in
 
 ## SwiftUI Integration – Banner Ads
 
-You can now use Banner Ads directly in SwiftUI by leveraging the `BannerAdView` wrapper.
+Use Banner Ads directly in SwiftUI with the `BannerAdView` wrapper.
 
 ```swift
 import SwiftUI
@@ -175,13 +175,9 @@ struct MyApp: App {
 - `.ADAPTIVE` banners automatically adjust their height based on device width.  
 - You can replace `.ADAPTIVE` with your specific `BannerAdType` if needed.
 
-## SwiftUI Integration – Native, Interstitial, and App Open Ads
+## SwiftUI Integration – Native Ads
 
-You can use Native Ads, Interstitial Ads, and App Open Ads directly in SwiftUI with AdsManagerKit.
-
-### Native Ads
-
-Use the `NativeAdContainerView` wrapper:
+Use the `NativeAdContainerView` wrapper to show native ads in SwiftUI.
 
 ```swift
 import SwiftUI
@@ -189,26 +185,29 @@ import AdsManager
 
 struct ContentView: View {
     var body: some View {
-        VStack(spacing: 20) {
-            Text("Hello SwiftUI Native Ads")
+        VStack {
+            Text("Native Ad Example")
                 .font(.title)
-
-            // Small native ad
-            NativeAdContainerView(adType: .SMALL)
-                .frame(height: 120)
+                .padding()
             
-            // Medium native ad
             NativeAdContainerView(adType: .MEDIUM)
                 .frame(height: 300)
             
-            // Large native ad
-            NativeAdContainerView(adType: .LARGE)
-                .frame(height: 400)
+            Spacer()
         }
         .padding()
     }
 }
 ```
+
+**Notes:**
+
+- Make sure to call `AdsManager.configure` before displaying ads.
+- Adjust the frame height according to the `adType` you choose.
+
+## SwiftUI Integration – Interstitial and App Open Ads
+
+You can use Native Ads, Interstitial Ads, and App Open Ads directly in SwiftUI with AdsManagerKit.
 
 ### Interstitial Ads
 

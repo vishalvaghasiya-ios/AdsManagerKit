@@ -82,23 +82,20 @@ final class BannerAdManager: NSObject {
         return Request() // Latest UMP SDK automatically handles ATT/GDPR
     }
     
-    
     /// SwiftUI-friendly banner container
-    public func makeBannerContainer(adType: BannerAdType = .REGULAR) -> UIView {
+    public func makeBannerContainer(adType: BannerAdType = .REGULAR,
+                                    onAdLoaded: ((CGFloat) -> Void)? = nil) -> UIView {
         let containerView = UIView()
         
         guard let rootVC = UIApplication.shared.windows.first?.rootViewController else {
             return containerView
         }
         
-        loadBannerAd(in: containerView, vc: rootVC, type: adType) { [weak containerView] success, height in
-            #if DEBUG
-            print("Banner loaded: \(success), height: \(height)")
-            #endif
-            
-            // Dynamically update container height if needed
+        // Call existing loadBannerAd, but forward a SwiftUI callback separately
+        loadBannerAd(in: containerView, vc: rootVC, type: adType) { success, height in
             DispatchQueue.main.async {
-                containerView?.frame.size.height = height
+                containerView.frame.size.height = height
+                onAdLoaded?(height)
             }
         }
         
@@ -128,13 +125,16 @@ extension BannerAdManager: BannerViewDelegate {
 // MARK: - SwiftUI Banner Wrapper
 public struct BannerAdView: UIViewRepresentable {
     public var adType: BannerAdType = .REGULAR
+    public var onAdLoaded: ((CGFloat) -> Void)? = nil
 
-    public init(adType: BannerAdType = .REGULAR) {
+    public init(adType: BannerAdType = .REGULAR,
+                onAdLoaded: ((CGFloat) -> Void)? = nil) {
         self.adType = adType
+        self.onAdLoaded = onAdLoaded
     }
 
     public func makeUIView(context: Context) -> UIView {
-        BannerAdManager.shared.makeBannerContainer(adType: adType)
+        BannerAdManager.shared.makeBannerContainer(adType: adType, onAdLoaded: onAdLoaded)
     }
 
     public func updateUIView(_ uiView: UIView, context: Context) { }
