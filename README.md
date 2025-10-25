@@ -124,7 +124,45 @@ This section provides clear, segmented examples on how to use AdsManagerKit in b
 
 ### **UIKit Integration**
 
-#### Banner Ads
+#### Step 1: Configure Ads
+
+```swift
+import UIKit
+import AdsManager
+
+@main
+class AppDelegate: UIResponder, UIApplicationDelegate {
+
+    func application(_ application: UIApplication,
+                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        AdsManager.configureAds(
+            appOpenId: "YOUR_APP_OPEN_AD_UNIT_ID",
+            bannerId: "YOUR_BANNER_AD_UNIT_ID",
+            interstitialId: "YOUR_INTERSTITIAL_AD_UNIT_ID",
+            nativeId: "YOUR_NATIVE_AD_UNIT_ID",
+            openAdEnabled: true,
+            bannerEnabled: true,
+            interstitialEnabled: true,
+            nativeEnabled: true,
+            nativePreloadEnabled: true
+        )
+        
+        AdsManager.configure {
+            print("Ads configured")
+        }
+        
+        return true
+    }
+    
+    func applicationDidBecomeActive(_ application: UIApplication) {
+        AdsManager.shared.presentAppOpenAdIfAvailable()
+    }
+}
+```
+
+#### Step 2: Banner Ads
+
+##### Banner Ads
 
 ```swift
 import UIKit
@@ -138,12 +176,13 @@ class ViewController: UIViewController {
 
         AdsManager.shared.loadBanner(in: bannerContainer, rootViewController: self) { isShown, height in
             print("Banner loaded: \(isShown), height: \(height)")
+            // Optionally adjust bannerContainer height constraint here based on `height`
         }
     }
 }
 ```
 
-#### Native Ads
+#### Step 3: Native Ads
 
 ```swift
 import UIKit
@@ -157,12 +196,13 @@ class ViewController: UIViewController {
 
         AdsManager.shared.loadNative(in: nativeContainer, adType: .SMALL) { isLoaded in
             print("Native ad loaded: \(isLoaded)")
+            // Optionally adjust nativeContainer height constraint here based on ad content
         }
     }
 }
 ```
 
-#### Interstitial Ads
+#### Step 4: Interstitial Ads
 
 ```swift
 import UIKit
@@ -183,26 +223,54 @@ class ViewController: UIViewController {
 }
 ```
 
-#### App Open Ads
+#### Step 5: App Open Ads
 
-```swift
-import UIKit
-import AdsManager
-
-@main
-class AppDelegate: UIResponder, UIApplicationDelegate {
-
-    func applicationDidBecomeActive(_ application: UIApplication) {
-        AdsManager.shared.presentAppOpenAdIfAvailable()
-    }
-}
-```
+Handled in `AppDelegate`'s `applicationDidBecomeActive` as shown above.
 
 ---
 
 ### **SwiftUI Integration**
 
-#### Banner Ads
+#### Step 1: Configure Ads
+
+```swift
+import SwiftUI
+import AdsManager
+
+@main
+struct MyApp: App {
+    init() {
+        AdsManager.configureAds(
+            appOpenId: "YOUR_APP_OPEN_AD_UNIT_ID",
+            bannerId: "YOUR_BANNER_AD_UNIT_ID",
+            interstitialId: "YOUR_INTERSTITIAL_AD_UNIT_ID",
+            nativeId: "YOUR_NATIVE_AD_UNIT_ID",
+            openAdEnabled: true,
+            bannerEnabled: true,
+            interstitialEnabled: true,
+            nativeEnabled: true,
+            nativePreloadEnabled: true
+        )
+        
+        AdsManager.configure {
+            print("Ads configured")
+        }
+    }
+    
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+                .onAppear {
+                    AdsManager.shared.presentAppOpenAdIfAvailable()
+                }
+        }
+    }
+}
+```
+
+#### Step 2: Banner Ads
+
+##### Banner Ads
 
 ```swift
 import SwiftUI
@@ -219,11 +287,10 @@ struct ContentView: View {
 
             Spacer()
 
-            // SwiftUI Banner Ad with dynamic height
             BannerAdView(adType: .ADAPTIVE)
                 .frame(height: bannerHeight)
                 .onAppear {
-                    // Optionally adjust height dynamically if needed
+                    // Optionally adjust bannerHeight dynamically if needed
                     // bannerHeight = calculatedHeight
                 }
 
@@ -233,25 +300,7 @@ struct ContentView: View {
 }
 ```
 
-Make sure to call `AdsManager.configure` early in your app lifecycle, for example in your App struct:
-
-```swift
-@main
-struct MyApp: App {
-    init() {
-        AdsManager.configure {
-            print("Ads configured")
-        }
-    }
-    var body: some Scene {
-        WindowGroup {
-            ContentView()
-        }
-    }
-}
-```
-
-#### Native Ads
+#### Step 3: Native Ads
 
 ```swift
 import SwiftUI
@@ -280,11 +329,14 @@ struct ContentView: View {
 }
 ```
 
-#### Interstitial Ads
+#### Step 4: Interstitial Ads
 
 To show interstitial ads in SwiftUI, you need access to a `UIViewController` to present from. You can get it like this:
 
 ```swift
+import SwiftUI
+import UIKit
+
 extension View {
     func rootViewController() -> UIViewController? {
         guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
@@ -312,29 +364,9 @@ Preload interstitial ads as needed:
 AdsManager.shared.loadInterstitial()
 ```
 
-#### App Open Ads
+#### Step 5: App Open Ads
 
-Show app open ads in SwiftUI by calling:
-
-```swift
-@main
-struct MyApp: App {
-    init() {
-        AdsManager.configure {
-            print("Ads configured")
-        }
-    }
-
-    var body: some Scene {
-        WindowGroup {
-            ContentView()
-                .onAppear {
-                    AdsManager.shared.presentAppOpenAdIfAvailable()
-                }
-        }
-    }
-}
-```
+Handled in the `.onAppear` of your main view or window group as shown in Step 1.
 
 ---
 
