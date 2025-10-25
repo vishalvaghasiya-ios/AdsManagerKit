@@ -29,7 +29,7 @@ public final class InterstitialAdManager: NSObject, FullScreenContentDelegate {
         return AdsConfig.currentInterstitialAdErrorCount >= AdsConfig.interstitialAdErrorCount
     }
     
-    public func loadAndShow(from viewController: UIViewController, completion: @escaping () -> Void) {
+    public func loadAndShow(from viewController: UIViewController? = nil, completion: @escaping () -> Void) {
         if !AdsConfig.interstitialAdEnabled {
             completion()
             return
@@ -37,11 +37,21 @@ public final class InterstitialAdManager: NSObject, FullScreenContentDelegate {
         
         self.completionHandler = completion
         
+        var presentingVC = viewController
+        
+        if presentingVC == nil {
+            #if DEBUG
+            print("[InterstitialAd] ⚠️ Warning: Passing nil viewController in UIKit context may not be safe.")
+            #endif
+            // Fallback to topMostViewController for SwiftUI usage
+            presentingVC = UIApplication.shared.topMostViewController()
+        }
+        
         if let ad = interstitialAd {
             #if DEBUG
             print("[InterstitialAd] already loaded — presenting directly.")
             #endif
-            ad.present(from: viewController)
+            ad.present(from: presentingVC)
             return
         }
         
@@ -73,7 +83,7 @@ public final class InterstitialAdManager: NSObject, FullScreenContentDelegate {
                 
                 self.interstitialAd = ad
                 self.interstitialAd?.fullScreenContentDelegate = self
-                ad?.present(from: viewController)
+                ad?.present(from: presentingVC)
             }
         }
     }
@@ -116,10 +126,20 @@ public final class InterstitialAdManager: NSObject, FullScreenContentDelegate {
     }
     
     /// Show the ad if available, then run completion
-    func showAd(from viewController: UIViewController, completion: @escaping () -> Void) {
+    func showAd(from viewController: UIViewController? = nil, completion: @escaping () -> Void) {
         if !AdsConfig.interstitialAdEnabled {
             completion()
             return
+        }
+        
+        var presentingVC = viewController
+        
+        if presentingVC == nil {
+            #if DEBUG
+            print("[InterstitialAd] ⚠️ Warning: Passing nil viewController in UIKit context may not be safe.")
+            #endif
+            // Fallback to topMostViewController for SwiftUI usage
+            presentingVC = UIApplication.shared.topMostViewController()
         }
         
         guard let ad = interstitialAd else {
@@ -134,7 +154,7 @@ public final class InterstitialAdManager: NSObject, FullScreenContentDelegate {
                 displayLimitCounter += 1
                 resetErrorCounter()
                 completionHandler = completion
-                ad.present(from: viewController)
+                ad.present(from: presentingVC)
             } else {
                 displayCounter += 1
                 completion()
@@ -168,5 +188,24 @@ public final class InterstitialAdManager: NSObject, FullScreenContentDelegate {
         #if DEBUG
         print("[InterstitialAd] Will present")
         #endif
+    }
+}
+
+extension UIApplication {
+    func topMostViewController(base: UIViewController? = UIApplication.shared.connectedScenes
+        .compactMap { ($0 as? UIWindowScene)?.keyWindow }
+        .first?.rootViewController) -> UIViewController? {
+        if let nav = base as? UINavigationController {
+            return topMostViewController(base: nav.visibleViewController)
+        }
+        if let tab = base as? UITabBarController {
+            if let selected = tab.selectedViewController {
+                return topMostViewController(base: selected)
+            }
+        }
+        if let presented = base?.presentedViewController {
+            return topMostViewController(base: presented)
+        }
+        return base
     }
 }

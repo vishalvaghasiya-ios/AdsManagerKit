@@ -202,7 +202,7 @@ public final class AdsManager: NSObject {
         InterstitialAdManager.shared.loadAd()
     }
     
-    public func showInterstitial(from viewController: UIViewController,
+    public func showInterstitial(from viewController: UIViewController? = nil,
                                  completion: @escaping () -> Void) {
         InterstitialAdManager.shared.showAd(from: viewController, completion: completion)
     }
