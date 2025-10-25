@@ -212,7 +212,7 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        AdsManager.shared.loadInterstitial()
+        // No need to manually load interstitial ads anymore as they are preloaded during configuration
     }
 
     @IBAction func showInterstitialTapped(_ sender: UIButton) {
@@ -358,11 +358,7 @@ Button("Show Interstitial Ad") {
 }
 ```
 
-Preload interstitial ads as needed:
-
-```swift
-AdsManager.shared.loadInterstitial()
-```
+// No need to call `AdsManager.shared.loadInterstitial()` manually as interstitial ads are preloaded during configuration.
 
 #### Step 5: App Open Ads
 
@@ -388,7 +384,7 @@ Example: Embedding a SwiftUI `BannerAdView` inside a UIKit `UIViewController` vi
 |------------------|--------------------------------------------|--------------------------------------|------------------------------------------|
 | Banner Ads       | `loadBanner(in:rootViewController:)`       | `BannerAdView(adType:)`               | Banner container UIView needed in UIKit  |
 | Native Ads       | `loadNative(in:adType:completion:)`        | `NativeAdContainerView(adType:)`      | Adjust frame size based on ad type        |
-| Interstitial Ads | `loadInterstitial()` + `showInterstitial(from:)` | Use `rootViewController()` + `showInterstitial(from:)` | Need UIViewController for presentation    |
+| Interstitial Ads | `showInterstitial(from:)` (preloaded automatically) | Use `rootViewController()` + `showInterstitial(from:)` | Need UIViewController for presentation; interstitials preload automatically |
 | App Open Ads     | Call `presentAppOpenAdIfAvailable()` in AppDelegate or scene | Call `presentAppOpenAdIfAvailable()` in `.onAppear` | Enable `openAdEnabled` in configuration   |
 
 ---

@@ -139,6 +139,8 @@ public final class InterstitialAdManager: NSObject, FullScreenContentDelegate {
                 displayCounter += 1
                 completion()
             }
+        } else {
+            completion()
         }
     }
     
