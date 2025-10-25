@@ -2,13 +2,19 @@
 
 [TOC]
 
-## 📚 Table of Contents
+## **📚 Table of Contents**
 - [✨ Features](#-features)
 - [🛠 Requirements](#-requirements)
 - [📦 Installation](#-installation)
 - [🚀 Quick Start and How to Use](#-quick-start-and-how-to-use)
+- [🎯 Usage Guide](#-usage-guide)
+  - [UIKit Integration](#-uikit-integration)
+  - [SwiftUI Integration](#-swiftui-integration)
+  - [Hybrid UIKit & SwiftUI Usage](#-hybrid-uikit--swiftui-usage)
+  - [Summary Table](#-summary-table)
 - [📝 Version](#-version)
 - [⚠️ Notes](#-notes)
+- [🛠 Troubleshooting](#-troubleshooting)
 - [👤 Author](#-author)
 
 ---
@@ -17,7 +23,7 @@
 
 ---
 
-## ✨ Features
+## **✨ Features**
 
 - Easy-to-integrate AdMob banner, interstitial, native, and app open ads.
 - Automated handling of App Tracking Transparency (ATT) prompts.
@@ -27,14 +33,14 @@
 - Configurable ad error counters and ad display frequency.
 - Asynchronous, safe ad loading to prevent crashes on iOS 14+.
 
-## 🛠 Requirements
+## **🛠 Requirements**
 
 - iOS 15+
 - Swift 5.9+
 - Xcode 26+
 - Add the [`NSUserTrackingUsageDescription`](https://developer.apple.com/documentation/bundleresources/information_property_list/nsusertrackingusagedescription) key in your app’s Info.plist to prevent crashes with ATT.
 
-## 📦 Installation
+## **📦 Installation**
 
 ### Swift Package Manager (SPM)
 
@@ -50,7 +56,7 @@ https://github.com/vishalvaghasiya-ios/AdsManagerKit.git
 import AdsManager
 ```
 
-## 🚀 Quick Start and How to Use
+## **🚀 Quick Start and How to Use**
 
 Set up your ads by configuring ad unit IDs and enabling desired ad types using the new `configureAds` method:
 
@@ -86,7 +92,7 @@ AdsManager.configureAds(
 // Then in your SplashScreen or initial view controller
 AdsManager.configure {
     DispatchQueue.main.async {
-        //Navigate or Other action
+        // Navigate or other action
     }
 }
 ```
@@ -123,38 +129,124 @@ AdsManager.shared.requestUMPConsent { granted in
 }
 ```
 
-### Loading and Showing Ads
+## **🎯 Usage Guide**
 
-## SwiftUI Integration – Banner Ads
+This section provides clear, segmented examples on how to use AdsManagerKit in both UIKit and SwiftUI, including hybrid usage scenarios. Examples cover Banner, Native, Interstitial, and App Open ads.
 
-Use Banner Ads directly in SwiftUI with the `BannerAdView` wrapper.
+---
+
+### **UIKit Integration**
+
+#### Banner Ads
+
+```swift
+import UIKit
+import AdsManager
+
+class ViewController: UIViewController {
+    @IBOutlet weak var bannerContainer: UIView!
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        AdsManager.shared.loadBanner(in: bannerContainer, rootViewController: self) { isShown, height in
+            print("Banner loaded: \(isShown), height: \(height)")
+        }
+    }
+}
+```
+
+#### Native Ads
+
+```swift
+import UIKit
+import AdsManager
+
+class ViewController: UIViewController {
+    @IBOutlet weak var nativeContainer: UIView!
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        AdsManager.shared.loadNative(in: nativeContainer, adType: .SMALL) { isLoaded in
+            print("Native ad loaded: \(isLoaded)")
+        }
+    }
+}
+```
+
+#### Interstitial Ads
+
+```swift
+import UIKit
+import AdsManager
+
+class ViewController: UIViewController {
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        AdsManager.shared.loadInterstitial()
+    }
+
+    @IBAction func showInterstitialTapped(_ sender: UIButton) {
+        AdsManager.shared.showInterstitial(from: self) {
+            print("Interstitial dismissed")
+        }
+    }
+}
+```
+
+#### App Open Ads
+
+```swift
+import UIKit
+import AdsManager
+
+@main
+class AppDelegate: UIResponder, UIApplicationDelegate {
+
+    func applicationDidBecomeActive(_ application: UIApplication) {
+        AdsManager.shared.presentAppOpenAdIfAvailable()
+    }
+}
+```
+
+---
+
+### **SwiftUI Integration**
+
+#### Banner Ads
 
 ```swift
 import SwiftUI
 import AdsManager
 
 struct ContentView: View {
+    @State private var bannerHeight: CGFloat = 50
+
     var body: some View {
         VStack {
             Text("Welcome to My App")
                 .font(.title)
                 .padding()
-            
+
             Spacer()
-            
-            // SwiftUI Banner Ad
+
+            // SwiftUI Banner Ad with dynamic height
             BannerAdView(adType: .ADAPTIVE)
-                .frame(height: 50) // Adaptive banners adjust height automatically
-            
+                .frame(height: bannerHeight)
+                .onAppear {
+                    // Optionally adjust height dynamically if needed
+                    // bannerHeight = calculatedHeight
+                }
+
             Spacer()
         }
     }
 }
 ```
 
-**Notes:**
-
-- Ensure `AdsManager.configure` is called **before showing ads**, typically in your App struct or initial view.  
+Make sure to call `AdsManager.configure` early in your app lifecycle, for example in your App struct:
 
 ```swift
 @main
@@ -172,27 +264,28 @@ struct MyApp: App {
 }
 ```
 
-- `.ADAPTIVE` banners automatically adjust their height based on device width.  
-- You can replace `.ADAPTIVE` with your specific `BannerAdType` if needed.
-
-## SwiftUI Integration – Native Ads
-
-Use the `NativeAdContainerView` wrapper to show native ads in SwiftUI.
+#### Native Ads
 
 ```swift
 import SwiftUI
 import AdsManager
 
 struct ContentView: View {
+    @State private var nativeAdHeight: CGFloat = 300
+
     var body: some View {
         VStack {
             Text("Native Ad Example")
                 .font(.title)
                 .padding()
-            
+
             NativeAdContainerView(adType: .MEDIUM)
-                .frame(height: 300)
-            
+                .frame(height: nativeAdHeight)
+                .onAppear {
+                    // Adjust nativeAdHeight dynamically if needed
+                    // nativeAdHeight = calculatedHeight
+                }
+
             Spacer()
         }
         .padding()
@@ -200,18 +293,9 @@ struct ContentView: View {
 }
 ```
 
-**Notes:**
+#### Interstitial Ads
 
-- Make sure to call `AdsManager.configure` before displaying ads.
-- Adjust the frame height according to the `adType` you choose.
-
-## SwiftUI Integration – Interstitial and App Open Ads
-
-You can use Native Ads, Interstitial Ads, and App Open Ads directly in SwiftUI with AdsManagerKit.
-
-### Interstitial Ads
-
-Interstitial ads require a `UIViewController` to present. You can get it using:
+To show interstitial ads in SwiftUI, you need access to a `UIViewController` to present from. You can get it like this:
 
 ```swift
 extension View {
@@ -223,11 +307,11 @@ extension View {
 }
 ```
 
-**Usage:**
+Usage example:
 
 ```swift
 Button("Show Interstitial Ad") {
-    if let vc = UIApplication.shared.windows.first?.rootViewController {
+    if let vc = rootViewController() {
         AdsManager.shared.showInterstitial(from: vc) {
             print("Interstitial dismissed")
         }
@@ -235,15 +319,15 @@ Button("Show Interstitial Ad") {
 }
 ```
 
-Preload interstitial ads with:
+Preload interstitial ads as needed:
 
 ```swift
 AdsManager.shared.loadInterstitial()
 ```
 
-### App Open Ads
+#### App Open Ads
 
-App Open Ads are shown when the app launches or returns from background:
+Show app open ads in SwiftUI by calling:
 
 ```swift
 @main
@@ -265,50 +349,51 @@ struct MyApp: App {
 }
 ```
 
-**Notes:**
+---
 
-- Ensure `appOpenEnabled = true` in `configureAds`.
-- Only show interstitial ads when they are ready.
+### **Hybrid UIKit & SwiftUI Usage**
 
-**Banner Ads:**  
-```swift
-AdsManager.shared.loadBanner(in: bannerContainer, rootViewController: self) { isShown, height in
-    print("Banner loaded: \(isShown), height: \(height)")
-}
-```
+You can mix UIKit and SwiftUI components seamlessly:
 
-**Interstitial Ads:**  
-```swift
-AdsManager.shared.showInterstitial(from: self) {
-    print("Interstitial dismissed")
-}
-```
+- Use UIKit for complex ad views or legacy code.
+- Use SwiftUI wrappers (`BannerAdView`, `NativeAdContainerView`) for quick integration.
+- Present interstitial and app open ads using UIKit view controllers accessed via SwiftUI.
 
-**Native Ads:**  
-```swift
-AdsManager.shared.loadNative(in: nativeContainer, adType: .SMALL) { isLoaded in
-    print("Native ad loaded: \(isLoaded)")
-}
-```
+Example: Embedding a SwiftUI `BannerAdView` inside a UIKit `UIViewController` via `UIHostingController` or showing interstitial ads from SwiftUI by retrieving the root view controller.
 
-**App Open Ads:**  
-```swift
-AdsManager.shared.presentAppOpenAdIfAvailable()
-```
+---
 
-### Test vs Production Ad Units
+### **Summary Table**
 
-Use the `isProductionApp` flag to switch between test and production ad units. When `isProductionApp` is set to `false`, AdsManager will use test ad units to help avoid invalid traffic during development and testing. Make sure to set this flag appropriately before configuring your ads.
+| Ad Type          | UIKit Usage                                | SwiftUI Usage                          | Notes                                    |
+|------------------|--------------------------------------------|--------------------------------------|------------------------------------------|
+| Banner Ads       | `loadBanner(in:rootViewController:)`       | `BannerAdView(adType:)`               | Banner container UIView needed in UIKit  |
+| Native Ads       | `loadNative(in:adType:completion:)`        | `NativeAdContainerView(adType:)`      | Adjust frame size based on ad type        |
+| Interstitial Ads | `loadInterstitial()` + `showInterstitial(from:)` | Use `rootViewController()` + `showInterstitial(from:)` | Need UIViewController for presentation    |
+| App Open Ads     | Call `presentAppOpenAdIfAvailable()` in AppDelegate or scene | Call `presentAppOpenAdIfAvailable()` in `.onAppear` | Enable `openAdEnabled` in configuration   |
 
+---
 
-## ⚠️ Notes
+## **📝 Version**
+
+### Version History
+
+- **v1.0.0** - Initial release with support for banner, interstitial, native, and app open ads.
+- **v1.1.0** - Added UMP consent support and premium mode.
+- **v1.2.0** - Improved SwiftUI integration and added dynamic height support.
+- **v1.3.0** - Bug fixes and performance improvements.
+
+---
+
+## **⚠️ Notes**
 
 - Ensure [`NSUserTrackingUsageDescription`](https://developer.apple.com/documentation/bundleresources/information_property_list/nsusertrackingusagedescription) is added in your app’s Info.plist to prevent crashes with ATT.  
 - Use Test Ad Units when `isProduction` is set to false.  
 - Always request UMP consent before loading personalized ads in regions requiring GDPR compliance.
 
   
-### 🛠 Add Google Mobile Ads App ID
+### **🛠 Add Google Mobile Ads App ID**
+
 Add your **Google Mobile Ads Application ID** in your app's `Info.plist`:
 
 ```xml
@@ -320,7 +405,7 @@ Add your **Google Mobile Ads Application ID** in your app's `Info.plist`:
 - Make sure the App ID is **unique to your app** and correctly formatted.
 - This ID is required for all AdMob ads to function properly.
 
-### Disable Native Ad Validator (Optional)
+### **Disable Native Ad Validator (Optional)**
 
 If you want to disable the Native Ad Validator in your app, add the following key to your `Info.plist`:
 
@@ -331,7 +416,28 @@ If you want to disable the Native Ad Validator in your app, add the following ke
 
 - This is optional and generally used to prevent validation logs in production.
 
-## 👤 Author
+---
+
+## **🛠 Troubleshooting**
+
+- **Ads not showing:**  
+  Ensure your ad unit IDs are correct and that you have enabled the respective ad types in `configureAds`. Use test ad units during development.
+
+- **App crashes on ATT permission request:**  
+  Verify that `NSUserTrackingUsageDescription` is set in your Info.plist.
+
+- **UMP Consent not appearing:**  
+  Confirm that you have correctly implemented `requestUMPConsent` and that your app region requires GDPR consent.
+
+- **Banner or Native ad height issues:**  
+  Use dynamic height adjustments in SwiftUI with `@State` variables as shown in the examples.
+
+- **Interstitial ads not presenting:**  
+  Make sure you present from a valid `UIViewController` and that the interstitial ad has finished loading before showing.
+
+---
+
+## **👤 Author**
 
 Vishal Vaghasiya  
 GitHub: [vishalvaghasiya-ios](https://github.com/vishalvaghasiya-ios)
