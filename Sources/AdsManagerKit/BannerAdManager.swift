@@ -128,13 +128,13 @@ extension BannerAdManager: BannerViewDelegate {
 #if canImport(SwiftUI)
 import SwiftUI
 
-struct BannerAdView: UIViewRepresentable {
+public struct BannerAdView: UIViewRepresentable {
     var adType: BannerAdType = .REGULAR
 
-    func makeUIView(context: Context) -> UIView {
+    public func makeUIView(context: Context) -> UIView {
         return BannerAdManager.shared.makeBannerContainer(adType: adType)
     }
 
-    func updateUIView(_ uiView: UIView, context: Context) { }
+    public func updateUIView(_ uiView: UIView, context: Context) { }
 }
 #endif

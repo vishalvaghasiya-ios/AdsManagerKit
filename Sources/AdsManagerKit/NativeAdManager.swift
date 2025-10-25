@@ -280,10 +280,10 @@ extension AdLoader: @unchecked @retroactive Sendable {}
 import SwiftUI
 
 /// SwiftUI wrapper for Native Ads
-struct NativeAdContainerView: UIViewRepresentable {
+public struct NativeAdContainerView: UIViewRepresentable {
     var adType: AdType = .MEDIUM
 
-    func makeUIView(context: Context) -> UIView {
+    public func makeUIView(context: Context) -> UIView {
         let containerView = UIView()
         containerView.backgroundColor = .clear
 
@@ -296,7 +296,7 @@ struct NativeAdContainerView: UIViewRepresentable {
         return containerView
     }
 
-    func updateUIView(_ uiView: UIView, context: Context) {
+    public func updateUIView(_ uiView: UIView, context: Context) {
         // No dynamic updates needed; ad content is managed internally
     }
 }
