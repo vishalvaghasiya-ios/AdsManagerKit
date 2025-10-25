@@ -1,4 +1,5 @@
 import GoogleMobileAds
+import SwiftUI
 import UIKit
 public enum BannerAdType: String {
     case ADAPTIVE
@@ -125,16 +126,16 @@ extension BannerAdManager: BannerViewDelegate {
 }
 
 // MARK: - SwiftUI Banner Wrapper
-#if canImport(SwiftUI)
-import SwiftUI
-
 public struct BannerAdView: UIViewRepresentable {
-    var adType: BannerAdType = .REGULAR
+    public var adType: BannerAdType = .REGULAR
+
+    public init(adType: BannerAdType = .REGULAR) {
+        self.adType = adType
+    }
 
     public func makeUIView(context: Context) -> UIView {
-        return BannerAdManager.shared.makeBannerContainer(adType: adType)
+        BannerAdManager.shared.makeBannerContainer(adType: adType)
     }
 
     public func updateUIView(_ uiView: UIView, context: Context) { }
 }
-#endif

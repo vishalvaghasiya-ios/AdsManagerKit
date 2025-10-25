@@ -276,12 +276,16 @@ extension NativeAd: @unchecked @retroactive Sendable {}
 extension AdLoader: @unchecked @retroactive Sendable {}
 
 // MARK: - Sendable Conformance for SDK Types
-#if canImport(SwiftUI)
 import SwiftUI
 
 /// SwiftUI wrapper for Native Ads
 public struct NativeAdContainerView: UIViewRepresentable {
-    var adType: AdType = .MEDIUM
+    public var adType: AdType = .SMALL
+
+    // ✅ Public initializer
+    public init(adType: AdType = .SMALL) {
+        self.adType = adType
+    }
 
     public func makeUIView(context: Context) -> UIView {
         let containerView = UIView()
@@ -300,4 +304,3 @@ public struct NativeAdContainerView: UIViewRepresentable {
         // No dynamic updates needed; ad content is managed internally
     }
 }
-#endif
